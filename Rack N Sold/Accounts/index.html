@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account - Rack N Sold</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-storage-compat.js"></script>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <div class="navbar">
+                <div class="logo">
+                    <img src="../images/logo.png" alt="80px">
+                    <h1>Rack N Sold</h1>
+                </div>
+                <nav>
+                    <ul>
+                        <li><a href="../racknsold.html">Home</a></li>
+                        <li><a href="../products.html">Products</a></li>
+                        <li><a href="">About</a></li>
+                        <li><a href="">Contact</a></li>
+                        <li><a href="index.html">Account</a></li>
+                    </ul>
+                </nav>
+                <a href="../cart.html">
+                    <img src="../images/cart.png" width="30px" height="30px">
+                </a>
+            </div>
+
+            <div class="row">
+                <div class="account-container">
+                    <div class="account-card">
+                        <div class="account-header">
+                            <h2>My Account</h2>
+                        </div>
+
+                        <section class="profile" id="profileSection">
+                            <img src="profile-placeholder.png" alt="Profile Picture" class="profile-picture" id="profilePicture">
+                            <div id="profileInfo">
+                                <h3>Profile Information</h3>
+                                <p><strong>Name:</strong> <span id="userName"></span></p>
+                                <p><strong>Email:</strong> <span id="userEmail"></span></p>
+                                <p><strong>Member Since:</strong> <span id="memberSince"></span></p>
+                            </div>
+
+                            <button class="btn" id="editProfileBtn">Edit Profile</button>
+                            <button class="btn" id="logoutBtn">Logout</button>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
+
+

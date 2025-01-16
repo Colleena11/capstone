@@ -1,0 +1,44 @@
+.feedback {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 25px;
+    border-radius: 5px;
+    color: white;
+    z-index: 1000;
+    animation: slidein 0.3s ease-in-out;
+}
+
+.feedback.success {
+    background-color: #4CAF50;
+}
+
+.feedback.error {
+    background-color: #f44336;
+}
+
+.error {
+    border-color: #f44336 !important;
+}
+
+.form-group .error-message {
+    color: #f44336;
+    font-size: 0.8em;
+    margin-top: 5px;
+}
+
+@keyframes slidein {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}

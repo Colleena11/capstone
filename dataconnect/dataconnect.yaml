@@ -1,0 +1,12 @@
+specVersion: "v1beta"
+serviceId: "Rack N Sold"
+location: "us-central1"
+schema:
+  source: "./schema"
+  datasource:
+    postgresql:
+      database: "fdcdb"
+      cloudSql:
+        instanceId: "Rack N Sold-fdc"
+      # schemaValidation: "COMPATIBLE"
+connectorDirs: ["./connector"]

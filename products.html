@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rack N Sold</title>
+    <link rel="stylesheet" href="css/productstyles.css">
+    <!-- Update Firebase loading order -->
+    <script src="javascripts/firebase-config.js"></script>
+    <script type="module" src="javascripts/firebase.js"></script>
+</head>
+<body>
+    <!-- ...existing code... -->
+    <script type="module">
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(async () => {
+                if (!window.firebaseServices) {
+                    console.error('Firebase not initialized');
+                    return;
+                }
+
+                const form = document.getElementById('artworkForm');
+                form.onsubmit = async (e) => {
+                    e.preventDefault();
+                    try {
+                        const data = {
+                            title: document.getElementById('artTitle').value,
+                            artist: document.getElementById('artistName').value,
+                            price: Number(document.getElementById('price').value),
+                            description: document.getElementById('description').value,
+                            imageUrl: 'https://via.placeholder.com/300'
+                        };
+
+                        const result = await window.firebaseServices.uploadArtwork(data);
+                        if (result.success) {
+                            alert('Saved successfully!');
+                            form.reset();
+                            location.reload();
+                        }
+                    } catch (error) {
+                        alert('Error saving: ' + error.message);
+                    }
+                };
+            }, 1000);
+        });
+    </script>
+    <!-- ...existing code... -->
+</body>
+</html>
