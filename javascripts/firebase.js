@@ -26,17 +26,61 @@ async function initializeFirebase() {
 }
 
 const firebaseServices = {
-    async uploadArtwork(artworkData) {
-        if (!db) await initializeFirebase();
+    async uploadArtwork(data) {
         try {
-            const docRef = await addDoc(collection(db, 'artworks'), {
-                ...artworkData,
-                createdAt: new Date().toISOString()
-            });
-            return { success: true, id: docRef.id, data: { ...artworkData, id: docRef.id } };
+            let imageUrl = null;
+            if (data.imageFile) {
+                const storageRef = storage.ref();
+                const imageRef = storageRef.child(`pending_artworks/${Date.now()}_${data.imageFile.name}`);
+                const uploadTask = await imageRef.put(data.imageFile);
+                imageUrl = await uploadTask.ref.getDownloadURL();
+            }
+
+            const artworkData = {
+                title: data.title,
+                artist: data.artist,
+                price: parseFloat(data.price),
+                description: data.description,
+                imageUrl: imageUrl || 'images/sample.png',
+                submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                status: 'pending'
+            };
+
+            // Save to pending_artworks collection
+            await db.collection('pending_artworks').add(artworkData);
+            return { success: true };
         } catch (error) {
-            console.error('Upload error:', error);
-            throw new Error('Failed to save artwork. Please try again.');
+            console.error('Upload failed:', error);
+            throw error;
+        }
+    },
+
+    async verifyArtwork(artworkId, status) {
+        const artworkRef = db.collection('pending_artworks').doc(artworkId);
+        
+        try {
+            const doc = await artworkRef.get();
+            if (!doc.exists) {
+                throw new Error('Artwork not found');
+            }
+
+            const artworkData = doc.data();
+            
+            if (status === 'approved') {
+                // Move to approved artworks collection
+                await addDoc(collection(db, 'approved_artworks'), {
+                    ...artworkData,
+                    status: 'approved',
+                    approvedAt: new Date().toISOString()
+                });
+            }
+
+            // Delete from pending
+            await artworkRef.delete();
+            return { success: true };
+        } catch (error) {
+            console.error('Verification failed:', error);
+            throw error;
         }
     },
 
@@ -54,6 +98,19 @@ const firebaseServices = {
         }
     },
 
+    async getApprovedArtworks() {
+        if (!db) await initializeFirebase();
+        try {
+            const querySnapshot = await getDocs(collection(db, 'approved_artworks'));
+            return querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+        } catch (error) {
+            console.error('Fetch approved artworks error:', error);
+            return [];
+        }
+    },
     // ...existing methods...
 };
 
