@@ -23,31 +23,32 @@ document.addEventListener('DOMContentLoaded', () => {
         submitBtn.disabled = true;
         
         try {
-            // Validate form data
+            const imageFile = fileInput.files[0];
+            if (!imageFile) {
+                throw new Error('Please select an image');
+            }
+
             const artworkData = {
                 title: document.getElementById('artTitle').value.trim(),
                 artist: document.getElementById('artistName').value.trim(),
                 price: parseFloat(document.getElementById('price').value),
                 description: document.getElementById('description').value.trim(),
-                createdAt: new Date().toISOString(),
-                status: 'available',
-                imageUrl: currentImagePreviewUrl // Save the current preview URL
+                imageFile: imageFile
             };
+
+            console.log('Submitting artwork:', artworkData);
 
             // Validate data
             if (!validateArtworkData(artworkData)) {
                 throw new Error('Please fill in all fields correctly');
             }
 
-            // Upload to Firestore
-            console.log('Uploading artwork:', artworkData);
+            // Upload to Firebase
             const result = await window.firebaseServices.uploadArtwork(artworkData);
 
             if (result.success) {
-                currentImagePreviewUrl = 'images/sample.png';
-                showNotification('Artwork uploaded successfully!', 'success');
+                showNotification('Artwork submitted for review. Please wait for admin approval.', 'success');
                 resetForm();
-                await loadArtworks();
             }
         } catch (error) {
             console.error('Upload failed:', error);
@@ -63,12 +64,15 @@ document.addEventListener('DOMContentLoaded', () => {
             container.innerHTML = '<p>Loading artworks...</p>';
             const artworks = await window.firebaseServices.getArtworks();
             
-            if (!artworks.length) {
+            // Filter to show only approved artworks
+            const approvedArtworks = artworks.filter(art => art.verificationStatus === 'approved');
+            
+            if (!approvedArtworks.length) {
                 container.innerHTML = '<p>No artworks available</p>';
                 return;
             }
 
-            container.innerHTML = artworks.map(art => createArtworkCard(art)).join('');
+            container.innerHTML = approvedArtworks.map(art => createArtworkCard(art)).join('');
         } catch (error) {
             console.error('Failed to load artworks:', error);
             container.innerHTML = '<p>Error loading artworks. Please try again later.</p>';
@@ -88,6 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function createArtworkCard(artwork) {
         return `
             <div class="artwork-item" data-id="${artwork.id}">
+                <button class="delete-btn" onclick="deleteArtwork('${artwork.id}')">&times;</button>
                 <img src="${artwork.imageUrl || 'images/sample.png'}" alt="${artwork.title}">
                 <div class="artwork-details">
                     <h3>${artwork.title}</h3>
@@ -105,7 +110,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function showNotification(message, type = 'info') {
-        alert(message); // You can replace this with a better notification system
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        
+        // Remove notification after 3 seconds
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
     }
 
     function resetForm() {
@@ -123,6 +136,46 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Add to cart failed:', error);
             alert('Failed to add to cart: ' + error.message);
+        }
+    };
+
+    // Global function for deleting artwork
+    window.deleteArtwork = async (artworkId) => {
+        if (!artworkId) {
+            alert('Invalid artwork ID');
+            return;
+        }
+
+        try {
+            if (confirm('Are you sure you want to delete this artwork?')) {
+                // Show loading state
+                const deleteBtn = document.querySelector(`[data-id="${artworkId}"] .delete-btn`);
+                if (deleteBtn) {
+                    deleteBtn.textContent = '...';
+                    deleteBtn.disabled = true;
+                }
+
+                // Attempt deletion
+                await window.firebaseServices.deleteArtwork(artworkId);
+                
+                // Remove from DOM if successful
+                const element = document.querySelector(`[data-id="${artworkId}"]`);
+                if (element) {
+                    element.remove();
+                }
+                
+                showNotification('Artwork deleted successfully', 'success');
+            }
+        } catch (error) {
+            console.error('Delete failed:', error);
+            showNotification('Error deleting artwork. Please try again.', 'error');
+            
+            // Reset delete button
+            const deleteBtn = document.querySelector(`[data-id="${artworkId}"] .delete-btn`);
+            if (deleteBtn) {
+                deleteBtn.textContent = '×';
+                deleteBtn.disabled = false;
+            }
         }
     };
 
