@@ -243,6 +243,7 @@ button:disabled {
     transition: transform 0.2s;
     background: #fff;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: relative;
 }
 
 .artwork-item:hover {
@@ -274,6 +275,7 @@ button:disabled {
     margin-top: 10px;
 }
 
+<<<<<<< HEAD
 .remove-btn {
     background-color: #ff4444;
     color: white;
@@ -286,4 +288,69 @@ button:disabled {
 
 .remove-btn:hover {
     background-color: #cc0000;
+=======
+.delete-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #ff523b;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.delete-btn:hover {
+    background: #ff2416;
+}
+
+.artwork-item:hover .delete-btn {
+    opacity: 1;
+}
+
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 25px;
+    border-radius: 4px;
+    color: white;
+    z-index: 1000;
+    animation: slideIn 0.3s ease-out;
+}
+
+.notification.success {
+    background-color: #4CAF50;
+}
+
+.notification.error {
+    background-color: #f44336;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.review-notice {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 20px;
+    padding: 10px;
+    background: #fff3cd;
+    border-radius: 4px;
+>>>>>>> e8deb359d12db4a0ab561bc2a1639ad9f394c527
 }
