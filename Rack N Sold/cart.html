@@ -26,9 +26,9 @@
                     <ul>
                         <li><a href="racknsold.html">Home</a></li>
                         <li><a href="products.html">Products</a></li>
-                        <li><a href="">About</a></li>
-                        <li><a href="">Contact</a></li>
-                        <li><a href="../Rack N Sold/Accounts/index.html">Account</a></li>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                        <li><a href="../Rack N Sold/Accounts/accounts.html">Account</a></li>
                     </ul>
                 </nav>
                 <a href="cart.html">
@@ -45,15 +45,15 @@
                     <h3>Order Summary</h3>
                     <div class="summary-item">
                         <span>Subtotal:</span>
-                        <span id="subtotal">$0.00</span>
+                        <span id="subtotal">₱0.00</span>
                     </div>
                     <div class="summary-item">
                         <span>Shipping:</span>
-                        <span id="shipping">$10.00</span>
+                        <span id="shipping">₱500.00</span>
                     </div>
                     <div class="summary-item total">
                         <span>Total:</span>
-                        <span id="total">$0.00</span>
+                        <span id="total">₱0.00</span>
                     </div>
                     <button id="checkout-btn" class="checkout-btn">Proceed to Checkout</button>
                 </div>
@@ -81,7 +81,7 @@
                             <div class="item-details">
                                 <h3>${item.title}</h3>
                                 <p>Artist: ${item.artist}</p>
-                                <p class="price">$${item.price.toFixed(2)}</p>
+                                <p class="price">₱${item.price.toFixed(2)}</p>
                             </div>
                             <button onclick="removeFromCart('${item.cartId}')" class="remove-btn">
                                 Remove
@@ -103,9 +103,9 @@
                 const shipping = subtotal > 0 ? 10 : 0;
                 const total = subtotal + shipping;
 
-                document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
-                document.getElementById('shipping').textContent = `$${shipping.toFixed(2)}`;
-                document.getElementById('total').textContent = `$${total.toFixed(2)}`;
+                document.getElementById('subtotal').textContent = `₱${subtotal.toFixed(2)}`;
+                document.getElementById('shipping').textContent = `₱${shipping.toFixed(2)}`;
+                document.getElementById('total').textContent = `₱${total.toFixed(2)}`;
             }
 
             window.removeFromCart = async (cartItemId) => {

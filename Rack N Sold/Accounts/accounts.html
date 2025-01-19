@@ -25,7 +25,7 @@
                         <li><a href="../products.html">Products</a></li>
                         <li><a href="../about.html">About</a></li>
                         <li><a href="../contact.html">Contact</a></li>
-                        <li><a href="index.html">Account</a></li>
+                        <li><a href="accounts.html">Account</a></li>
                     </ul>
                 </nav>
                 <a href="../cart.html">
@@ -40,7 +40,29 @@
                             <h2>My Account</h2>
                         </div>
 
-                        <section class="profile" id="profileSection">
+                        <div class="login-form">
+                            <input type="text" placeholder="Username" id="username" class="form-input">
+                            <input type="password" placeholder="Password" id="password" class="form-input">
+                            
+                            <div class="button-group">
+                                <button class="btn" id="loginBtn">Login</button>
+                                <button class="btn" id="createAccountBtn">Create Account</button>
+                            </div>
+
+                            <div class="social-login">
+                                <p>Or login with:</p>
+                                <button class="btn social-btn google-btn">
+                                    <img src="../images/googlelogo.png" alt="Google">
+                                    Google
+                                </button>
+                                <button class="btn social-btn facebook-btn">
+                                    <img src="../images/fblogo.png" alt="Facebook">
+                                    Facebook
+                                </button>
+                            </div>
+                        </div>
+
+                        <section class="profile" id="profileSection" style="display: none;">
                             <img src="profile-placeholder.png" alt="Profile Picture" class="profile-picture" id="profilePicture">
                             <div id="profileInfo">
                                 <h3>Profile Information</h3>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Rack N Sold</title>
+    <link rel="stylesheet" href="../css/admin.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+</head>
+<body>
+    <div class="admin-header">
+        <h1>Admin Dashboard</h1>
+        <nav>
+            <a href="../racknsold.html">Back to Site</a>
+        </nav>
+    </div>
+
+    <div class="pending-artworks">
+        <h2>Pending Artworks</h2>
+        <div id="pending-container" class="artworks-grid"></div>
+    </div>
+
+    <script src="../javascripts/firebase.js"></script>
+    <script src="../javascripts/admin.js"></script>
+</body>
+</html>

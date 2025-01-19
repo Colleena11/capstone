@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gallery - Rack N Sold</title>
+    <link rel="stylesheet" href="css/productstyles.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <!-- Firebase services -->
+    <script src="javascripts/firebase.js"></script>
+    <script src="javascripts/gallery.js"></script>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <div class="navbar">
+                <div class="logo">
+                    <img src="images/logo.png" alt="80px">
+                    <h1>Rack N Sold</h1>
+                </div>
+                <nav>
+                    <ul>
+                        <li><a href="racknsold.html">Home</a></li>
+                        <li><a href="products.html">Upload</a></li>
+                        <li><a href="gallery.html">Gallery</a></li>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                        <li><a href="Accounts/accounts.html">Account</a></li>
+                    </ul>
+                </nav>
+                <a href="cart.html">
+                    <img src="images/cart.png" width="30px" height="30px">
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="gallery-container">
+        <h2>Approved Artworks Gallery</h2>
+        <div id="gallery-grid" class="gallery-grid">
+            <!-- Artworks will be loaded here -->
+        </div>
+    </div>
+
+    <script>
+        // Load only approved artworks
+        db.collection('approved_artworks')
+            .orderBy('approvedAt', 'desc')
+            .onSnapshot((snapshot) => {
+                const galleryGrid = document.getElementById('gallery-grid');
+                snapshot.docChanges().forEach((change) => {
+                    if (change.type === 'added') {
+                        const artwork = change.doc.data();
+                        const artworkElement = `
+                            <div class="artwork-card">
+                                <img src="${artwork.imageUrl}" alt="${artwork.title}">
+                                <h3>${artwork.title}</h3>
+                                <p>By ${artwork.artist}</p>
+                                <p class="price">₱${artwork.price.toFixed(2)}</p>
+                            </div>
+                        `;
+                        galleryGrid.insertAdjacentHTML('beforeend', artworkElement);
+                    }
+                });
+            });
+    </script>
+</body>
+</html>

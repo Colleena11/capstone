@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Platform - Rack N Sold</title>
+    <link rel="stylesheet" href="../../Rack N Sold/css/admin.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+</head>
+<body>
+    <div class="admin-header">
+        <h1>Admin Dashboard</h1>
+        <nav>
+            <a href="../../Rack N Sold/racknsold.html">Back to Site</a>
+        </nav>
+    </div>
+
+    <div class="admin-content">
+        <div class="pending-artworks">
+            <h2>Pending Artworks for Review</h2>
+            <div id="pending-container" class="artworks-grid">
+                <!-- Loading indicator -->
+                <div id="loading-indicator">Loading pending artworks...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add notification container -->
+    <div id="notification-container"></div>
+
+    <script src="../../Rack N Sold/javascripts/firebase.js"></script>
+    <script>
+        // Initialize Firebase (make sure this comes from your firebase.js)
+        document.addEventListener('DOMContentLoaded', () => {
+            const pendingContainer = document.getElementById('pending-container');
+            const loadingIndicator = document.getElementById('loading-indicator');
+
+            // Real-time listener for pending artworks
+            db.collection('pending_artworks')
+                .orderBy('submittedAt', 'desc')
+                .onSnapshot((snapshot) => {
+                    loadingIndicator.style.display = 'none';
+                    
+                    if (snapshot.empty) {
+                        pendingContainer.innerHTML = '<p class="no-items">No pending artworks to review</p>';
+                        return;
+                    }
+
+                    snapshot.docChanges().forEach((change) => {
+                        const artwork = change.doc.data();
+                        const artworkId = change.doc.id;
+
+                        if (change.type === 'added') {
+                            const artworkCard = `
+                                <div class="artwork-card" data-id="${artworkId}">
+                                    <div class="artwork-image">
+                                        <img src="${artwork.imageUrl}" 
+                                             alt="${artwork.title}"
+                                             onerror="this.src='../../Rack N Sold/images/sample.png'">
+                                    </div>
+                                    <div class="artwork-details">
+                                        <h3>${artwork.title}</h3>
+                                        <p class="artist">By: ${artwork.artist}</p>
+                                        <p class="price">Price: ₱${parseFloat(artwork.price).toFixed(2)}</p>
+                                        <p class="description">${artwork.description || 'No description provided'}</p>
+                                        <div class="action-buttons">
+                                            <button onclick="handleApproval('${artworkId}', true)" class="approve-btn">
+                                                Approve
+                                            </button>
+                                            <button onclick="handleApproval('${artworkId}', false)" class="reject-btn">
+                                                Reject
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                            pendingContainer.insertAdjacentHTML('beforeend', artworkCard);
+                        }
+                        
+                        if (change.type === 'removed') {
+                            const element = document.querySelector(`[data-id="${artworkId}"]`);
+                            if (element) {
+                                element.classList.add('fade-out');
+                                setTimeout(() => element.remove(), 500);
+                            }
+                        }
+                    });
+                }, (error) => {
+                    console.error("Error fetching artworks:", error);
+                    pendingContainer.innerHTML = '<p class="error">Error loading artworks. Please refresh the page.</p>';
+                });
+        });
+
+        // Handle approval/rejection
+        async function handleApproval(artworkId, isApproved) {
+            try {
+                const artworkRef = db.collection('pending_artworks').doc(artworkId);
+                const artworkDoc = await artworkRef.get();
+                
+                if (!artworkDoc.exists) {
+                    console.error('Artwork not found');
+                    return;
+                }
+
+                const artworkData = artworkDoc.data();
+
+                if (isApproved) {
+                    // Move to approved collection
+                    await db.collection('approved_artworks').add({
+                        ...artworkData,
+                        approvedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+
+                // Remove from pending
+                await artworkRef.delete();
+
+                // Show success message
+                alert(`Artwork ${isApproved ? 'approved' : 'rejected'} successfully`);
+
+            } catch (error) {
+                console.error('Error handling approval:', error);
+                alert('Error processing artwork. Please try again.');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,12 +1,11 @@
-// Firebase Configuration
+// Verify these match your Firebase console settings
 const firebaseConfig = {
     apiKey: "AIzaSyBnCDceh11o03SryLLfMPTvsB1ldE6yj2o",
     authDomain: "rack-n--sold-c2bc0.firebaseapp.com",
     projectId: "rack-n--sold-c2bc0",
-    storageBucket: "rack-n--sold-c2bc0.firebasestorage.app",
+    storageBucket: "rack-n--sold-c2bc0.appspot.com", // Make sure this is correct
     messagingSenderId: "934643385207",
-    appId: "1:934643385207:web:507bd5cdc2dd7568c31772",
-    measurementId: "G-VCCD9M4JZV"
+    appId: "1:934643385207:web:507bd5cdc2dd7568c31772"
 };
 
 // Initialize Firebase
@@ -50,31 +49,28 @@ window.firebaseServices = {
 
     addToCart: async function(artworkId) {
         try {
-            // Get artwork details
+            // Get the artwork details
             const artworkDoc = await db.collection('artworks').doc(artworkId).get();
             if (!artworkDoc.exists) {
                 throw new Error('Artwork not found');
             }
 
-            const artwork = {
-                id: artworkDoc.id,
-                ...artworkDoc.data()
-            };
-
+            const artworkData = artworkDoc.data();
+            
             // Add to cart collection
             await db.collection('cart').add({
                 artworkId: artworkId,
-                title: artwork.title,
-                artist: artwork.artist,
-                price: artwork.price,
-                imageUrl: artwork.imageUrl,
+                title: artworkData.title,
+                artist: artworkData.artist,
+                price: artworkData.price,
+                imageUrl: artworkData.imageUrl,
                 addedAt: firebase.firestore.FieldValue.serverTimestamp()
             });
 
             return { success: true };
         } catch (error) {
-            console.error('Add to cart failed:', error);
-            throw new Error('Failed to add to cart');
+            console.error('Add to cart error:', error);
+            throw error;
         }
     },
 
@@ -102,7 +98,50 @@ window.firebaseServices = {
             console.error('Error removing from cart:', error);
             throw new Error('Failed to remove item from cart');
         }
+    },
+
+    async removeFromGallery(artworkId) {
+        try {
+            await db.collection('artworks').doc(artworkId).delete();
+            return true;
+        } catch (error) {
+            console.error('Error removing artwork:', error);
+            throw error;
+        }
     }
 };
+
+// Function to handle artwork submission
+async function submitArtwork(artworkData) {
+    try {
+        // Add to pending_artworks collection
+        await db.collection('pending_artworks').add({
+            ...artworkData,
+            status: 'pending',
+            submittedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        return true;
+    } catch (error) {
+        console.error('Error submitting artwork:', error);
+        return false;
+    }
+}
+
+// Function to handle admin approval
+async function verifyArtwork(artworkId, status) {
+    const artworkRef = db.collection('pending_artworks').doc(artworkId);
+    const artwork = await artworkRef.get();
+    
+    if (status === 'approved') {
+        // Move to approved_artworks collection
+        await db.collection('approved_artworks').add({
+            ...artwork.data(),
+            approvedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+    }
+    
+    // Remove from pending
+    await artworkRef.delete();
+}
 
 console.log('Firebase services ready');

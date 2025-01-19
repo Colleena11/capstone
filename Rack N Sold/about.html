@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - Rack N Sold</title>
+    <link rel="stylesheet" href="css/aboutstyles.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <!-- Firebase services -->
+    <script src="javascripts/firebase.js"></script>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <div class="navbar">
+                <div class="logo">
+                    <img src="images/logo.png" alt="80px">
+                    <h1>    Rack N Sold                                                                                         </h1>
+                </div>
+                <nav>
+                    <ul>
+                        <li><a href="racknsold.html">Home</a></li>
+                        <li><a href="products.html">Products</a></li>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                        <li><a href="../Rack N Sold/Accounts/accounts.html">Account</a></li>
+                    </ul>
+                </nav>
+                <a href="cart.html">
+                    <img src="images/cart.png" width="30px" height="30px">
+                </a>
+            </div>
+        
+            <!-- Rest of the about page content -->
+            <div class="about-hero">
+                <h1>About Rack N Sold</h1>
+                <p>Your Premier Destination for Unique Artworks</p>
+            </div>
+        </div>
+    </div>
+
+    <section class="our-story">
+        <div class="container">
+            <h2>Our Story</h2>
+            <p>Founded in 2024, Rack N Sold was born from a passion for connecting artists with art lovers. We believe in creating a platform where creativity thrives and artists can showcase their work to a global audience.</p>
+        </div>
+    </section>
+
+    <section class="mission-values">
+        <div class="container">
+            <div class="mission">
+                <h2>Our Mission</h2>
+                <p>To empower artists and make art accessible to everyone while building a vibrant community of creators and collectors.</p>
+            </div>
+            <div class="values">
+                <h2>Our Values</h2>
+                <div class="values-grid">
+                    <div class="value-card">
+                        <h3>Creativity</h3>
+                        <p>We celebrate artistic expression in all its forms</p>
+                    </div>
+                    <div class="value-card">
+                        <h3>Integrity</h3>
+                        <p>Fair practices and transparency in all transactions</p>
+                    </div>
+                    <div class="value-card">
+                        <h3>Community</h3>
+                        <p>Building connections between artists and art lovers</p>
+                    </div>
+                    <div class="value-card">
+                        <h3>Innovation</h3>
+                        <p>Constantly improving our platform for better experiences</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="team">
+        <div class="container">
+            <h2>Our Team</h2>
+            <div class="team-grid" id="team-members">
+                <!-- Team members will be loaded dynamically -->
+            </div>
+        </div>
+    </section>
+
+    <script src="javascripts/about.js"></script>
+</body>
+</html>

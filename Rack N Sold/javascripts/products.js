@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
     const form = document.getElementById('artworkForm');
     const preview = document.getElementById('photo-pic');
-    const container = document.getElementById('artworks-container');
     const submitBtn = form.querySelector('button[type="submit"]');
     const fileInput = document.getElementById('input-file');
 
@@ -47,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentImagePreviewUrl = 'images/sample.png';
                 showNotification('Artwork uploaded successfully!', 'success');
                 resetForm();
-                await loadArtworks();
+                // Remove loadArtworks() call since gallery is now on a different page
             }
         } catch (error) {
             console.error('Upload failed:', error);
@@ -57,24 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Load and display artworks
-    async function loadArtworks() {
-        try {
-            container.innerHTML = '<p>Loading artworks...</p>';
-            const artworks = await window.firebaseServices.getArtworks();
-            
-            if (!artworks.length) {
-                container.innerHTML = '<p>No artworks available</p>';
-                return;
-            }
-
-            container.innerHTML = artworks.map(art => createArtworkCard(art)).join('');
-        } catch (error) {
-            console.error('Failed to load artworks:', error);
-            container.innerHTML = '<p>Error loading artworks. Please try again later.</p>';
-        }
-    }
-
     // Helper Functions
     function validateArtworkData(data) {
         return (
@@ -83,25 +64,6 @@ document.addEventListener('DOMContentLoaded', () => {
             data.price > 0 &&
             data.description.length > 0
         );
-    }
-
-    function createArtworkCard(artwork) {
-        return `
-            <div class="artwork-item" data-id="${artwork.id}">
-                <img src="${artwork.imageUrl || 'images/sample.png'}" alt="${artwork.title}">
-                <div class="artwork-details">
-                    <h3>${artwork.title}</h3>
-                    <p class="artist">By ${artwork.artist}</p>
-                    <p class="price">$${artwork.price.toFixed(2)}</p>
-                    <p class="description">${artwork.description}</p>
-                    <div class="artwork-actions">
-                        <button onclick="addToCartAndNotify('${artwork.id}')" class="add-to-cart-btn">
-                            Add to Cart
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
     }
 
     function showNotification(message, type = 'info') {
@@ -126,7 +88,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Initialize
-    loadArtworks();
     console.log('Products page initialized');
 });
