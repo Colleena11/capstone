@@ -1,0 +1,20 @@
+<!-- ...existing code... -->
+                            <div class="item-details">
+                                <h3>₱{item.title}</h3>
+                                <p>Artist: ₱{item.artist}</p>
+                                <p class="price">₱{(item.price).toFixed(2)}</p>
+                            </div>
+<!-- ...existing code... -->
+
+            function updateTotals(items) {
+                const subtotal = Array.isArray(items) 
+                    ? items.reduce((sum, item) => sum + item.price, 0)
+                    : 0;
+                const shipping = subtotal > 0 ? 500 : 0; // Changed shipping to 500 pesos
+                const total = subtotal + shipping;
+
+                document.getElementById('subtotal').textContent = `₱{subtotal.toFixed(2)}`;
+                document.getElementById('shipping').textContent = `₱{shipping.toFixed(2)}`;
+                document.getElementById('total').textContent = `₱{total.toFixed(2)}`;
+            }
+<!-- ...existing code... -->

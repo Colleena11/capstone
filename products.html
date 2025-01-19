@@ -3,47 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rack N Sold</title>
-    <link rel="stylesheet" href="css/productstyles.css">
-    <!-- Update Firebase loading order -->
-    <script src="javascripts/firebase-config.js"></script>
-    <script type="module" src="javascripts/firebase.js"></script>
+    <title>Products - Rack N Sold</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Update Firebase SDK imports -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 </head>
 <body>
-    <!-- ...existing code... -->
-    <script type="module">
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(async () => {
-                if (!window.firebaseServices) {
-                    console.error('Firebase not initialized');
-                    return;
-                }
+    <div class="products-container">
+        <h2>Available Artworks</h2>
+        <div class="upload-section">
+            <form id="artwork-form">
+                <input type="file" id="artwork-image" accept="image/*" required>
+                <input type="text" id="artwork-title" placeholder="Artwork Title" required>
+                <input type="text" id="artwork-price" placeholder="Price" required>
+                <button type="submit">Upload Artwork</button>
+            </form>
+        </div>
+        <div id="approved-artworks" class="artworks-grid"></div>
+    </div>
 
-                const form = document.getElementById('artworkForm');
-                form.onsubmit = async (e) => {
-                    e.preventDefault();
-                    try {
-                        const data = {
-                            title: document.getElementById('artTitle').value,
-                            artist: document.getElementById('artistName').value,
-                            price: Number(document.getElementById('price').value),
-                            description: document.getElementById('description').value,
-                            imageUrl: 'https://via.placeholder.com/300'
-                        };
-
-                        const result = await window.firebaseServices.uploadArtwork(data);
-                        if (result.success) {
-                            alert('Saved successfully!');
-                            form.reset();
-                            location.reload();
-                        }
-                    } catch (error) {
-                        alert('Error saving: ' + error.message);
-                    }
-                };
-            }, 1000);
-        });
-    </script>
-    <!-- ...existing code... -->
+    <script src="javascripts/firebase.js"></script>
+    <script src="javascripts/products.js"></script>
 </body>
 </html>

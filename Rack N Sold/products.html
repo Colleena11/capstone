@@ -15,60 +15,58 @@
 <body>
     <div class="header">
         <div class="container">
-        <div class="navbar">
-            <div class="logo">
-                <img src="images/logo.png" alt="80px">
-                <h1>    Rack N Sold                                                                                         </h1>
+            <div class="navbar">
+                <div class="logo">
+                    <img src="images/logo.png" alt="80px">
+                    <h1>Rack N Sold</h1>
+                </div>
+                <nav>
+                    <ul>
+                        <li><a href="racknsold.html">Home</a></li>
+                        <li><a href="products.html">Upload</a></li>
+                        <li><a href="gallery.html">Gallery</a></li>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                        <li><a href="../Rack N Sold/Accounts/index.html">Account</a></li>
+                    </ul>
+                </nav>
+                <a href="cart.html">
+                    <img src="images/cart.png" width="30px" height="30px">
+                </a>
             </div>
-            <nav>
-                <ul>
-                    <li><a href="racknsold.html">Home</a></li>
-                    <li><a href="products.html">Products</a></li>
-                    <li><a href="">About</a></li>
-                    <li><a href="">Contact</a></li>
-                    <li><a href="../Rack N Sold/Accounts/index.html">Account</a></li>
-                </ul>
-            </nav>
-            <a href="cart.html">
-                <img src="images/cart.png" width="30px" height="30px">
-            </a>
         </div>
-   <div class="upload">
-    <div class="card">
-        <h2>Upload your art</h2>
-        <form id="artworkForm">
-            <img src="images/sample.png" id="photo-pic">
-            <label for="input-file">Upload Photo</label>
-            <input 
-                type="file" 
-                name="artwork"
-                accept="image/jpeg, image/png, image/jpg" 
-                id="input-file" 
-                required
-            >
-            
-            <div class="form-group">
-                <input type="text" id="artTitle" name="title" placeholder="Artwork Title" required>
-            </div>
-            <div class="form-group">
-                <input type="text" id="artistName" name="artist" placeholder="Artist Name" required>
-            </div>
-            <div class="form-group">
-                <input type="number" id="price" name="price" placeholder="Price" required>
-            </div>
-            <div class="form-group">
-                <textarea id="description" name="description" placeholder="Artwork Description" required></textarea>
-            </div>
-            <button type="submit">Submit Artwork</button>
-        </form>
     </div>
-   </div>
 
-   <!-- Add this section after the upload form -->
-   <div class="artwork-gallery">
-        <h2>Available Artworks</h2>
-        <div id="artworks-container" class="artworks-grid"></div>
-   </div>
+    <div class="upload">
+        <div class="card">
+            <h2>Upload your art</h2>
+            <form id="artworkForm">
+                <img src="images/sample.png" id="photo-pic">
+                <label for="input-file">Upload Photo</label>
+                <input 
+                    type="file" 
+                    name="artwork"
+                    accept="image/jpeg, image/png, image/jpg" 
+                    id="input-file" 
+                    required
+                >
+                
+                <div class="form-group">
+                    <input type="text" id="artTitle" name="title" placeholder="Artwork Title" required>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="artistName" name="artist" placeholder="Artist Name" required>
+                </div>
+                <div class="form-group">
+                    <input type="number" id="price" name="price" placeholder="Price" required>
+                </div>
+                <div class="form-group">
+                    <textarea id="description" name="description" placeholder="Artwork Description" required></textarea>
+                </div>
+                <button type="submit">Submit Artwork</button>
+            </form>
+        </div>
+    </div>
 
 </body>
 </html>

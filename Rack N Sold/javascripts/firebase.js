@@ -50,31 +50,28 @@ window.firebaseServices = {
 
     addToCart: async function(artworkId) {
         try {
-            // Get artwork details
+            // Get the artwork details
             const artworkDoc = await db.collection('artworks').doc(artworkId).get();
             if (!artworkDoc.exists) {
                 throw new Error('Artwork not found');
             }
 
-            const artwork = {
-                id: artworkDoc.id,
-                ...artworkDoc.data()
-            };
-
+            const artworkData = artworkDoc.data();
+            
             // Add to cart collection
             await db.collection('cart').add({
                 artworkId: artworkId,
-                title: artwork.title,
-                artist: artwork.artist,
-                price: artwork.price,
-                imageUrl: artwork.imageUrl,
+                title: artworkData.title,
+                artist: artworkData.artist,
+                price: artworkData.price,
+                imageUrl: artworkData.imageUrl,
                 addedAt: firebase.firestore.FieldValue.serverTimestamp()
             });
 
             return { success: true };
         } catch (error) {
-            console.error('Add to cart failed:', error);
-            throw new Error('Failed to add to cart');
+            console.error('Add to cart error:', error);
+            throw error;
         }
     },
 
