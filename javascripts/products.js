@@ -1,7 +1,10 @@
 document.addEventListener('DOMContentLoaded', async () => {
     const approvedArtworksContainer = document.getElementById('approved-artworks');
+<<<<<<< HEAD
     const artworkForm = document.getElementById('artwork-form');
     const artworksGrid = document.getElementById('approved-artworks');
+=======
+>>>>>>> 58b177bb62c207a4305dbee5132ff78e36badeda
 
     async function loadApprovedArtworks() {
         try {
@@ -26,6 +29,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+<<<<<<< HEAD
     artworkForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const imageFile = document.getElementById('artwork-image').files[0];
@@ -89,4 +93,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Initial load of approved artworks
     loadApprovedArtworks();
     displayArtworks();
+=======
+    // Initial load of approved artworks
+    loadApprovedArtworks();
+>>>>>>> 58b177bb62c207a4305dbee5132ff78e36badeda
 });

@@ -1,7 +1,11 @@
 // Team members data
 const teamMembers = [
     {
+<<<<<<< HEAD
         name: "Mark Joshua Diog",
+=======
+        name: "Joshua Diog",
+>>>>>>> 58b177bb62c207a4305dbee5132ff78e36badeda
         role: "Founder & CEO",
         image: "images/team/joshua.jpg",
         description: "Art enthusiast with 10+ years in digital platforms"
@@ -9,7 +13,11 @@ const teamMembers = [
     {
         name: "Colleen Mallari",
         role: "Head of Curation",
+<<<<<<< HEAD
         image: "C:\Users\MALLARI\Downloads\Rack N Sold\Rack N Sold\images\colleen.png",
+=======
+        image: "images/team/colleen.jpg",
+>>>>>>> 58b177bb62c207a4305dbee5132ff78e36badeda
         description: "Former gallery curator with passion for emerging artists"
     },
     {

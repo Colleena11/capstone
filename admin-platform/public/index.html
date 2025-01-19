@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Platform - Rack N Sold</title>
+    <link rel="stylesheet" href="../../Rack N Sold/css/admin.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+</head>
+<body>
+    <div class="admin-header">
+        <h1>Admin Dashboard</h1>
+        <nav>
+            <a href="../../Rack N Sold/racknsold.html">Back to Site</a>
+        </nav>
+    </div>
+
+    <div class="pending-artworks">
+        <h2>Pending Artworks for Review</h2>
+        <div id="pending-container" class="artworks-grid"></div>
+    </div>
+
+    <script src="../../Rack N Sold/javascripts/firebase.js"></script>
+    <script>
+        // Real-time listener for pending artworks
+        document.addEventListener('DOMContentLoaded', () => {
+            const pendingContainer = document.getElementById('pending-container');
+
+            // Set up real-time listener
+            db.collection('pending_artworks')
+                .orderBy('submittedAt', 'desc')
+                .onSnapshot((snapshot) => {
+                    snapshot.docChanges().forEach((change) => {
+                        const artwork = { id: change.doc.id, ...change.doc.data() };
+                        
+                        if (change.type === 'added') {
+                            const artworkElement = createArtworkElement(artwork);
+                            pendingContainer.insertAdjacentHTML('beforeend', artworkElement);
+                        }
+                        if (change.type === 'removed') {
+                            const element = document.querySelector(`[data-id="${artwork.id}"]`);
+                            if (element) element.remove();
+                        }
+                    });
+
+                    // Show message if no pending artworks
+                    if (snapshot.empty) {
+                        pendingContainer.innerHTML = '<p class="no-items">No pending artworks</p>';
+                    }
+                });
+
+            function createArtworkElement(artwork) {
+                return `
+                    <div class="artwork-card" data-id="${artwork.id}">
+                        <img src="${artwork.imageUrl}" alt="${artwork.title}" 
+                             onerror="this.src='../../Rack N Sold/images/sample.png'">
+                        <div class="artwork-details">
+                            <h3>${artwork.title}</h3>
+                            <p class="artist">By ${artwork.artist}</p>
+                            <p class="price">$${artwork.price.toFixed(2)}</p>
+                            <p class="description">${artwork.description}</p>
+                            <p class="timestamp">Submitted: ${new Date(artwork.submittedAt?.toDate()).toLocaleString()}</p>
+                            <div class="action-buttons">
+                                <button onclick="handleApproval('${artwork.id}', true)" class="approve-btn">
+                                    Approve
+                                </button>
+                                <button onclick="handleApproval('${artwork.id}', false)" class="reject-btn">
+                                    Reject
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Handle approval/rejection
+            window.handleApproval = async (artworkId, isApproved) => {
+                try {
+                    const status = isApproved ? 'approved' : 'rejected';
+                    await window.firebaseServices.verifyArtwork(artworkId, status);
+                    
+                    const element = document.querySelector(`[data-id="${artworkId}"]`);
+                    if (element) {
+                        element.classList.add('fade-out');
+                        setTimeout(() => element.remove(), 500);
+                    }
+
+                    showNotification(`Artwork ${status} successfully`, 'success');
+                } catch (error) {
+                    console.error('Approval failed:', error);
+                    showNotification('Error processing artwork', 'error');
+                }
+            };
+
+            function showNotification(message, type) {
+                const notification = document.createElement('div');
+                notification.className = `admin-notification ${type}`;
+                notification.textContent = message;
+                document.body.appendChild(notification);
+                setTimeout(() => notification.remove(), 3000);
+            }
+        });
+    </script>
+</body>
+</html>
