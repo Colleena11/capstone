@@ -6,13 +6,26 @@
     <title>Shopping Cart - Rack N Sold</title>
     <link rel="stylesheet" href="css/productstyles.css">
     <link rel="stylesheet" href="css/cartstyles.css">
+    
+    <!-- Firebase Config -->
+    <script>
+        window.firebaseConfig = {
+            apiKey: "AIzaSyA7YXMYSpGCopC5oEjD_RNk1YrflrHriFM",
+            authDomain: "rack-n-sold.firebaseapp.com",
+            projectId: "rack-n-sold",
+            storageBucket: "rack-n-sold.appspot.com",
+            messagingSenderId: "1022023662117",
+            appId: "1:1022023662117:web:d4ee23cc7c0643e04547cf"
+        };
+    </script>
+    
     <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
     <!-- Firebase services -->
-    <script src="javascripts/firebase.js"></script>
+    <script type="module" src="javascripts/firebase.js"></script>
     <!-- Cart functionality -->
-    <script src="javascripts/cart.js"></script>
+    <script type="module" src="javascripts/cart.js"></script>
 </head>
 <body>
     <div class="header">
@@ -39,7 +52,8 @@
             <div class="cart-container">
                 <h2>Your Shopping Cart</h2>
                 <div id="cart-items" class="cart-items">
-                    <!-- Cart items will be loaded here -->
+                    <!-- Cart items will be dynamically loaded -->
+                    <p>Loading cart...</p>
                 </div>
                 <div class="cart-summary">
                     <h3>Order Summary</h3>
@@ -49,7 +63,7 @@
                     </div>
                     <div class="summary-item">
                         <span>Shipping:</span>
-                        <span id="shipping">₱500.00</span>
+                        <span id="shipping">₱0.00</span>
                     </div>
                     <div class="summary-item total">
                         <span>Total:</span>
@@ -60,66 +74,5 @@
             </div>
         </div>
     </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            const cartContainer = document.getElementById('cart-items');
-            
-            async function loadCartItems() {
-                try {
-                    const items = await window.firebaseServices.getCartItems();
-                    
-                    if (items.length === 0) {
-                        cartContainer.innerHTML = '<p class="empty-cart">Your cart is empty</p>';
-                        updateTotals(0);
-                        return;
-                    }
-
-                    cartContainer.innerHTML = items.map(item => `
-                        <div class="cart-item">
-                            <img src="${item.imageUrl}" alt="${item.title}">
-                            <div class="item-details">
-                                <h3>${item.title}</h3>
-                                <p>Artist: ${item.artist}</p>
-                                <p class="price">₱${item.price.toFixed(2)}</p>
-                            </div>
-                            <button onclick="removeFromCart('${item.cartId}')" class="remove-btn">
-                                Remove
-                            </button>
-                        </div>
-                    `).join('');
-
-                    updateTotals(items);
-                } catch (error) {
-                    console.error('Error loading cart:', error);
-                    cartContainer.innerHTML = '<p class="error">Error loading cart items</p>';
-                }
-            }
-
-            function updateTotals(items) {
-                const subtotal = Array.isArray(items) 
-                    ? items.reduce((sum, item) => sum + item.price, 0)
-                    : 0;
-                const shipping = subtotal > 0 ? 10 : 0;
-                const total = subtotal + shipping;
-
-                document.getElementById('subtotal').textContent = `₱${subtotal.toFixed(2)}`;
-                document.getElementById('shipping').textContent = `₱${shipping.toFixed(2)}`;
-                document.getElementById('total').textContent = `₱${total.toFixed(2)}`;
-            }
-
-            window.removeFromCart = async (cartItemId) => {
-                try {
-                    await window.firebaseServices.removeFromCart(cartItemId);
-                    await loadCartItems();
-                } catch (error) {
-                    alert('Error removing item from cart');
-                }
-            };
-
-            // Load cart items when page loads
-            await loadCartItems();
-        });
-    </script>
 </body>
 </html>

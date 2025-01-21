@@ -114,18 +114,24 @@ window.addToCart = async (artworkId) => {
         }
 
         const artworkData = artworkDoc.data();
-        
-        // Add to cart collection with default values for missing fields
-        await addDoc(collection(db, 'cart'), {
+
+        // Create a cart item with all necessary fields
+        const cartItem = {
             userId: user.uid,
             artworkId: artworkId,
             title: artworkData.title || 'Untitled',
-            price: artworkData.price || 0,
-            imageUrl: artworkData.imageUrl || 'images/sample.png',
+            price: Number(artworkData.price) || 0,
             artist: artworkData.artist || 'Unknown Artist',
-            addedAt: new Date(),
-            quantity: 1
-        });
+            description: artworkData.description || '',
+            addedAt: new Date().toISOString(), // Use ISO string for consistent date format
+            quantity: 1,
+            // Include these additional fields for display
+            imageUrl: artworkData.imageUrl || null
+        };
+
+        // Add to cart collection
+        const cartRef = collection(db, 'cart');
+        await addDoc(cartRef, cartItem);
 
         showNotification('Added to cart successfully!', 'success');
     } catch (error) {

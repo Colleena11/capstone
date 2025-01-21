@@ -19,7 +19,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         async function loadCartItems() {
             try {
-                // Check if user is logged in
                 const user = auth.currentUser;
                 if (!user) {
                     cartContainer.innerHTML = '<p class="error">Please log in to view your cart</p>';
@@ -30,41 +29,63 @@ document.addEventListener('DOMContentLoaded', async () => {
                 cartContainer.innerHTML = '<p>Loading cart items...</p>';
                 
                 const cartRef = collection(db, 'cart');
-                const q = query(
-                    cartRef, 
-                    where('userId', '==', user.uid),
-                    orderBy('addedAt', 'desc')
-                );
-                const querySnapshot = await getDocs(q);
-                
-                const cartItems = querySnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
-
-                if (!cartItems || cartItems.length === 0) {
-                    cartContainer.innerHTML = '<p class="empty-cart">Your cart is empty</p>';
-                    updateTotals([]);
-                    return;
+                try {
+                    // Try with ordering first
+                    const q = query(
+                        cartRef, 
+                        where('userId', '==', user.uid),
+                        orderBy('addedAt', 'desc')
+                    );
+                    const querySnapshot = await getDocs(q);
+                    displayCartItems(querySnapshot);
+                } catch (error) {
+                    if (error.code === 'failed-precondition') {
+                        // If index doesn't exist, fetch without ordering
+                        console.log('Fetching without ordering');
+                        const basicQuery = query(cartRef, where('userId', '==', user.uid));
+                        const querySnapshot = await getDocs(basicQuery);
+                        displayCartItems(querySnapshot);
+                    } else {
+                        throw error;
+                    }
                 }
-
-                cartContainer.innerHTML = cartItems.map(item => `
-                    <div class="cart-item" data-id="${item.id}">
-                        <img src="${item.imageUrl || '../images/sample.png'}" alt="${item.title}" class="cart-item-image">
-                        <div class="item-details">
-                            <h3>${item.title}</h3>
-                            <p>Artist: ${item.artist}</p>
-                            <p class="price">₱${Number(item.price).toFixed(2)}</p>
-                        </div>
-                        <button onclick="removeFromCart('${item.id}')" class="remove-btn">Remove</button>
-                    </div>
-                `).join('');
-
-                updateTotals(cartItems);
             } catch (error) {
                 console.error('Failed to load cart:', error);
                 cartContainer.innerHTML = '<p class="error">Error loading cart items</p>';
             }
+        }
+
+        function displayCartItems(querySnapshot) {
+            const cartItems = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+
+            if (!cartItems || cartItems.length === 0) {
+                cartContainer.innerHTML = '<p class="empty-cart">Your cart is empty</p>';
+                updateTotals([]);
+                return;
+            }
+
+            cartContainer.innerHTML = cartItems.map(item => `
+                <div class="cart-item" data-id="${item.id}">
+                    <img src="${item.imageUrl || 'images/sample.png'}" 
+                         alt="${item.title}" 
+                         class="cart-item-image"
+                         onerror="this.src='images/sample.png'">
+                    <div class="item-details">
+                        <h3>${item.title || 'Untitled'}</h3>
+                        <p>Artist: ${item.artist || 'Unknown Artist'}</p>
+                        <p class="description">${item.description || ''}</p>
+                        <p class="price">₱${Number(item.price).toFixed(2)}</p>
+                    </div>
+                    <div class="item-actions">
+                        <button onclick="removeFromCart('${item.id}')" class="remove-btn">Remove</button>
+                    </div>
+                </div>
+            `).join('');
+
+            updateTotals(cartItems);
         }
 
         function updateTotals(items) {

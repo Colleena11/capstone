@@ -1,8 +1,16 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-import { getFirestore, collection, addDoc, getDocs, query, where, deleteDoc, doc, serverTimestamp, orderBy, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-import { auth } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { getFirestore, collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { getAuth } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 
-let app, db;
+// Initialize Firebase using config from window
+const app = initializeApp(window.firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+// Make Firebase instances available globally
+window.firebaseApp = app;
+window.firebaseDb = db;
+window.firebaseAuth = auth;
 
 async function initializeFirebase() {
     try {

@@ -6,38 +6,9 @@
     <title>Rack N Sold</title>
     <link rel="stylesheet" href="css/productstyles.css">
     <!-- Update Firebase SDK imports -->
-    <script type="module">
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getStorage } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
-        
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyBnCDceh11o03SryLLfMPTvsB1ldE6yj2o",
-            authDomain: "rack-n--sold-c2bc0.firebaseapp.com",
-            projectId: "rack-n--sold-c2bc0",
-            storageBucket: "rack-n--sold-c2bc0.appspot.com",
-            messagingSenderId: "934643385207",
-            appId: "1:934643385207:web:507bd5cdc2dd7568c31772"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const storage = getStorage(app);
-
-        // Make Firebase services available globally
-        window.firebaseApp = app;
-        window.firebaseAuth = auth;
-        window.firebaseDb = db;
-        window.firebaseStorage = storage;
-    </script>
-    <!-- Load your scripts after Firebase -->
-    <script src="javascripts/firebase.js" type="module"></script>
-    <script src="javascripts/products.js" type="module"></script>
+    <script type="module" src="javascripts/firebase.js"></script>
+    <script type="module" src="javascripts/products.js"></script>
+    <!-- Remove the inline Firebase configuration script since it's now in firebase.js -->
     <style>
         .progress-bar {
             width: 100%;

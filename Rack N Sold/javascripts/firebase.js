@@ -1,5 +1,10 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { 
+    getFirestore, 
+    collection, 
+    addDoc, 
+    serverTimestamp 
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import { 
@@ -67,25 +72,20 @@ const firebaseServices = {
                 throw new Error('User must be logged in to upload artwork');
             }
 
-            // Get form data
-            const title = formData.get('title');
-            const artist = formData.get('artist');
-            const price = parseFloat(formData.get('price'));
-            const description = formData.get('description');
-
-            // Create artwork document
+            // Create artwork document without image
             const artworkData = {
-                title,
-                artist,
-                price,
-                description,
+                title: formData.get('title'),
+                artist: formData.get('artist'),
+                price: parseFloat(formData.get('price')),
+                description: formData.get('description'),
                 userId: user.uid,
                 createdAt: serverTimestamp(),
                 status: 'pending'
             };
 
             // Save to Firestore
-            const docRef = await addDoc(collection(db, 'artworks'), artworkData);
+            const artworksRef = collection(db, 'artworks');
+            const docRef = await addDoc(artworksRef, artworkData);
             
             return {
                 success: true,
@@ -94,7 +94,7 @@ const firebaseServices = {
             };
         } catch (error) {
             console.error('Error in uploadArtwork:', error);
-            throw new Error(error.message || 'Failed to save artwork information');
+            throw error;
         }
     },
 
