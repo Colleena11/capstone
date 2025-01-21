@@ -109,25 +109,41 @@ label{
     cursor: pointer;
 }
 input[type="file"] {
-    display: none;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    cursor: pointer;
 }
 
 .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #333;
+    background: none;
+    width: auto;
+    text-align: left;
+    padding: 0;
 }
 
 .form-group input,
 .form-group textarea {
-    display: block;
     width: 100%;
-    padding: 10px;
+    padding: 8px 12px;
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 14px;
 }
 
 .form-group textarea {
-    height: 100px;
+    min-height: 100px;
     resize: vertical;
 }
 
@@ -159,80 +175,125 @@ button:disabled {
 }
 
 .artwork-gallery {
-    padding: 50px 0;
-    background: #fff;
+    padding: 20px;
     max-width: 1200px;
     margin: 0 auto;
+    min-height: 400px;
+    background-color: #fff;
 }
 
 .artwork-gallery h2 {
     text-align: center;
-    margin: 30px 0;
+    margin-bottom: 30px;
     color: #333;
+    font-size: 24px;
 }
 
 .artworks-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 30px;
     padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
+    background-color: #fff;
+    min-height: 200px;
 }
 
 .artwork-card {
-    background: #fff;
+    background: white;
+    border: 1px solid #ddd;
     border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    padding: 15px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    transition: transform 0.3s ease;
+    margin-bottom: 20px;
 }
 
 .artwork-card:hover {
     transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
 }
 
-.artwork-card img {
+.artwork-image {
     width: 100%;
-    height: 200px;
+    height: 250px;
     object-fit: cover;
-    border-radius: 4px;
-    margin-bottom: 10px;
+    border-bottom: 1px solid #eee;
 }
 
-.artwork-card h3 {
-    font-size: 1.2rem;
-    margin: 10px 0;
-    text-align: center;
+.artwork-details {
+    padding: 15px;
 }
 
-.artwork-card .artist {
-    color: #666;
-    margin: 5px 0;
-}
-
-.artwork-card .price {
-    font-weight: bold;
+.artwork-title {
+    font-size: 18px;
     color: #333;
-    margin: 5px 0;
+    margin-bottom: 10px;
+    font-weight: 600;
 }
 
-.artwork-card .add-to-cart-btn {
-    background: #4CAF50;
+.artist {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.price {
+    color: #e3362c;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.description {
+    color: #777;
+    font-size: 14px;
+    margin-bottom: 15px;
+    line-height: 1.4;
+}
+
+.add-to-cart-btn {
+    background: #e3362c;
     color: white;
     border: none;
-    padding: 8px 15px;
+    padding: 10px 20px;
     border-radius: 4px;
     cursor: pointer;
-    margin-top: 10px;
+    font-size: 14px;
     transition: background 0.3s ease;
+    width: 100%;
 }
 
-.artwork-card .add-to-cart-btn:hover {
-    background: #45a049;
+.add-to-cart-btn:hover {
+    background: #d62d24;
+}
+
+.loading {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+    font-size: 16px;
+}
+
+.no-artworks {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+    font-size: 16px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    margin: 20px;
+}
+
+.error-message {
+    text-align: center;
+    padding: 20px;
+    color: #e3362c;
+    font-size: 16px;
+    background: #fff5f5;
+    border-radius: 8px;
+    margin: 20px;
 }
 
 .artwork-item {
@@ -275,7 +336,6 @@ button:disabled {
     margin-top: 10px;
 }
 
-<<<<<<< HEAD
 .remove-btn {
     background-color: #ff4444;
     color: white;
@@ -288,7 +348,8 @@ button:disabled {
 
 .remove-btn:hover {
     background-color: #cc0000;
-=======
+}
+
 .delete-btn {
     position: absolute;
     top: 10px;
@@ -317,13 +378,12 @@ button:disabled {
 
 .notification {
     position: fixed;
-    top: 20px;
+    bottom: 20px;
     right: 20px;
     padding: 15px 25px;
-    border-radius: 4px;
+    border-radius: 5px;
     color: white;
     z-index: 1000;
-    animation: slideIn 0.3s ease-out;
 }
 
 .notification.success {
@@ -352,5 +412,50 @@ button:disabled {
     padding: 10px;
     background: #fff3cd;
     border-radius: 4px;
->>>>>>> e8deb359d12db4a0ab561bc2a1639ad9f394c527
+}
+
+.submit-btn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.submit-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.file-upload {
+    position: relative;
+    margin: 20px 0;
+    text-align: center;
+}
+
+.upload-label {
+    display: inline-block;
+    padding: 10px 20px;
+    background: #e3362c;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 10px 0;
+}
+
+.file-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+#input-file {
+    display: none;
 }

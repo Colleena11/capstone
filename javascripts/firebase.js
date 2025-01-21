@@ -1,5 +1,6 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-import { getFirestore, collection, addDoc, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { getFirestore, collection, addDoc, getDocs, query, where, deleteDoc, doc, serverTimestamp, orderBy, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { auth } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 
 let app, db;
 
@@ -25,12 +26,54 @@ async function initializeFirebase() {
     }
 }
 
-const firebaseServices = {
+// Export as a module
+export const firebaseServices = {
+    async initializeFirebase() {
+        try {
+            if (!window.firebaseApp) {
+                console.error('Firebase app not initialized');
+                return false;
+            }
+            console.log('Firebase services ready');
+            return true;
+        } catch (error) {
+            console.error('Firebase initialization error:', error);
+            return false;
+        }
+    },
+
+    async getCartItems(userId) {
+        try {
+            const cartQuery = query(
+                collection(window.firebaseDb, 'cart'),
+                where('userId', '==', userId)
+            );
+            const querySnapshot = await getDocs(cartQuery);
+            return querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+        } catch (error) {
+            console.error('Error getting cart items:', error);
+            throw error;
+        }
+    },
+
+    async removeFromCart(itemId) {
+        try {
+            await deleteDoc(doc(window.firebaseDb, 'cart', itemId));
+            return true;
+        } catch (error) {
+            console.error('Error removing item from cart:', error);
+            throw error;
+        }
+    },
+
     async uploadArtwork(data) {
         try {
             let imageUrl = null;
             if (data.imageFile) {
-                const storageRef = storage.ref();
+                const storageRef = window.firebaseStorage.ref();
                 const imageRef = storageRef.child(`pending_artworks/${Date.now()}_${data.imageFile.name}`);
                 const uploadTask = await imageRef.put(data.imageFile);
                 imageUrl = await uploadTask.ref.getDownloadURL();
@@ -42,13 +85,13 @@ const firebaseServices = {
                 price: parseFloat(data.price),
                 description: data.description,
                 imageUrl: imageUrl || 'images/sample.png',
-                submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                submittedAt: new Date().toISOString(),
                 status: 'pending'
             };
 
-            // Save to pending_artworks collection
-            await db.collection('pending_artworks').add(artworkData);
-            return { success: true };
+            // Save to pending_artworks collection using modern Firestore syntax
+            await addDoc(collection(window.firebaseDb, 'pending_artworks'), artworkData);
+            return { success: true, message: 'Artwork uploaded successfully!' };
         } catch (error) {
             console.error('Upload failed:', error);
             throw error;
@@ -56,28 +99,31 @@ const firebaseServices = {
     },
 
     async verifyArtwork(artworkId, status) {
-        const artworkRef = db.collection('pending_artworks').doc(artworkId);
-        
         try {
-            const doc = await artworkRef.get();
-            if (!doc.exists) {
+            const artworkRef = doc(window.firebaseDb, 'pending_artworks', artworkId);
+            const docSnap = await getDoc(artworkRef);
+            
+            if (!docSnap.exists()) {
                 throw new Error('Artwork not found');
             }
 
-            const artworkData = doc.data();
+            const artworkData = docSnap.data();
             
             if (status === 'approved') {
-                // Move to approved artworks collection
-                await addDoc(collection(db, 'approved_artworks'), {
+                // Move to approved artworks collection with proper timestamp
+                await addDoc(collection(window.firebaseDb, 'approved_artworks'), {
                     ...artworkData,
                     status: 'approved',
-                    approvedAt: new Date().toISOString()
+                    approvedAt: new Date().toISOString(),
+                    approvedBy: window.firebaseAuth.currentUser?.uid || 'system',
+                    createdAt: new Date().toISOString(),
+                    submittedAt: artworkData.submittedAt || new Date().toISOString()
                 });
             }
 
             // Delete from pending
-            await artworkRef.delete();
-            return { success: true };
+            await deleteDoc(artworkRef);
+            return { success: true, message: 'Artwork verification completed!' };
         } catch (error) {
             console.error('Verification failed:', error);
             throw error;
@@ -101,7 +147,13 @@ const firebaseServices = {
     async getApprovedArtworks() {
         if (!db) await initializeFirebase();
         try {
-            const querySnapshot = await getDocs(collection(db, 'approved_artworks'));
+            const querySnapshot = await getDocs(
+                query(
+                    collection(db, 'approved_artworks'),
+                    where('status', '==', 'approved'),
+                    orderBy('approvedAt', 'desc')
+                )
+            );
             return querySnapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()

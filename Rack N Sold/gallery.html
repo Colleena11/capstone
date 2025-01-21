@@ -5,17 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gallery - Rack N Sold</title>
     <link rel="stylesheet" href="css/productstyles.css">
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
-<<<<<<< HEAD
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-=======
->>>>>>> e8deb359d12db4a0ab561bc2a1639ad9f394c527
-    <!-- Firebase services -->
-    <script src="javascripts/firebase.js"></script>
-    <script src="javascripts/gallery.js"></script>
+    
+    <!-- Import Firebase and gallery scripts -->
+    <script type="module" src="javascripts/firebase.js"></script>
+    <script type="module" src="javascripts/gallery.js"></script>
 </head>
 <body>
     <div class="header">
@@ -31,12 +24,8 @@
                         <li><a href="products.html">Upload</a></li>
                         <li><a href="gallery.html">Gallery</a></li>
                         <li><a href="about.html">About</a></li>
-                        <li><a href="contact.html">Contact</a></li>
-<<<<<<< HEAD
                         <li><a href="Accounts/accounts.html">Account</a></li>
-=======
-                        <li><a href="Accounts/index.html">Account</a></li>
->>>>>>> e8deb359d12db4a0ab561bc2a1639ad9f394c527
+                        <li><a href="contact.html">Contact</a></li>
                     </ul>
                 </nav>
                 <a href="cart.html">
@@ -45,42 +34,9 @@
             </div>
         </div>
     </div>
-
-<<<<<<< HEAD
-    <div class="gallery-container">
-        <h2>Approved Artworks Gallery</h2>
-        <div id="gallery-grid" class="gallery-grid">
-            <!-- Artworks will be loaded here -->
-        </div>
-    </div>
-
-    <script>
-        // Load only approved artworks
-        db.collection('approved_artworks')
-            .orderBy('approvedAt', 'desc')
-            .onSnapshot((snapshot) => {
-                const galleryGrid = document.getElementById('gallery-grid');
-                snapshot.docChanges().forEach((change) => {
-                    if (change.type === 'added') {
-                        const artwork = change.doc.data();
-                        const artworkElement = `
-                            <div class="artwork-card">
-                                <img src="${artwork.imageUrl}" alt="${artwork.title}">
-                                <h3>${artwork.title}</h3>
-                                <p>By ${artwork.artist}</p>
-                                <p class="price">₱${artwork.price.toFixed(2)}</p>
-                            </div>
-                        `;
-                        galleryGrid.insertAdjacentHTML('beforeend', artworkElement);
-                    }
-                });
-            });
-    </script>
-=======
     <div class="artwork-gallery">
         <h2>Available Artworks</h2>
         <div id="artworks-container" class="artworks-grid"></div>
     </div>
->>>>>>> e8deb359d12db4a0ab561bc2a1639ad9f394c527
 </body>
 </html>

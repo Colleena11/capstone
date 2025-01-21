@@ -40,34 +40,56 @@
                             <h2>My Account</h2>
                         </div>
 
-<<<<<<< HEAD
                         <div class="login-form">
-                            <input type="text" placeholder="Username" id="username" class="form-input">
-                            <input type="password" placeholder="Password" id="password" class="form-input">
+                            <input type="email" placeholder="Email" id="loginEmail" class="form-input">
+                            <input type="password" placeholder="Password" id="loginPassword" class="form-input">
                             
                             <div class="button-group">
-                                <button class="btn" id="loginBtn">Login</button>
-                                <button class="btn" id="createAccountBtn">Create Account</button>
+                                <button type="button" class="btn" id="loginBtn">Login</button>
+                                <button type="button" class="btn" id="createAccountBtn" onclick="document.getElementById('registrationModal').style.display='block'; document.querySelector('.login-form').style.display='none';">Create Account</button>
                             </div>
 
                             <div class="social-login">
                                 <p>Or login with:</p>
-                                <button class="btn social-btn google-btn">
+                                <button class="btn social-btn google-btn" id="googleLoginBtn">
                                     <img src="../images/googlelogo.png" alt="Google">
                                     Google
                                 </button>
-                                <button class="btn social-btn facebook-btn">
+                                <button class="btn social-btn facebook-btn" id="facebookLoginBtn">
                                     <img src="../images/fblogo.png" alt="Facebook">
                                     Facebook
                                 </button>
                             </div>
                         </div>
 
+                        <div id="registrationModal" class="modal" style="display: none;">
+                            <div class="modal-content">
+                                <span class="close">&times;</span>
+                                <h2>Create Your Account</h2>
+                                <form id="registrationForm">
+                                    <div class="form-group">
+                                        <input type="text" id="regUsername" placeholder="Username" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="email" id="regEmail" placeholder="Email Address" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="tel" id="regPhone" placeholder="Contact Number (e.g., +63-XXXX-XXXX)" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="password" id="regPassword" placeholder="Password (min. 6 characters)" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="password" id="regConfirmPassword" placeholder="Confirm Password" required>
+                                    </div>
+                                    <div id="errorMessage" class="error-message"></div>
+                                    <button type="submit" class="btn">Create Account</button>
+                                </form>
+                            </div>
+                        </div>
+
                         <section class="profile" id="profileSection" style="display: none;">
-=======
-                        <section class="profile" id="profileSection">
->>>>>>> e8deb359d12db4a0ab561bc2a1639ad9f394c527
-                            <img src="profile-placeholder.png" alt="Profile Picture" class="profile-picture" id="profilePicture">
+                            <img src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y" alt="Profile Picture" class="profile-picture" id="profilePicture">
                             <div id="profileInfo">
                                 <h3>Profile Information</h3>
                                 <p><strong>Name:</strong> <span id="userName"></span></p>
@@ -84,7 +106,7 @@
         </div>
     </div>
 
-    <script src="app.js"></script>
+    <script type="module" src="app.js"></script>
 </body>
 </html>
 

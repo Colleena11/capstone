@@ -1,16 +1,16 @@
 .admin-header {
-    background: #2c3e50;
+    background: #2c5282;
     color: white;
-    padding: 20px;
+    padding: 1rem 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.admin-header a {
+.admin-header nav a {
     color: white;
     text-decoration: none;
-    padding: 8px 16px;
+    padding: 0.5rem 1rem;
     border: 1px solid white;
     border-radius: 4px;
 }
@@ -37,10 +37,10 @@
 .artwork-card {
     border: 1px solid #ddd;
     border-radius: 8px;
-    overflow: hidden;
-    background: white;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s, opacity 0.5s;
+    padding: 15px;
+    margin: 15px;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .artwork-card.processing {
@@ -55,12 +55,13 @@
 
 .artwork-card img {
     width: 100%;
-    height: 200px;
+    max-height: 200px;
     object-fit: cover;
+    border-radius: 4px;
 }
 
 .artwork-details {
-    padding: 15px;
+    margin-top: 10px;
 }
 
 .artwork-details h3 {
@@ -80,31 +81,29 @@
 }
 
 .approve-btn, .reject-btn {
-    flex: 1;
-    padding: 8px 0;
+    padding: 8px 16px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     font-weight: bold;
-    transition: background-color 0.3s;
 }
 
 .approve-btn {
-    background: #2ecc71;
+    background-color: #4CAF50;
+    color: white;
+}
+
+.reject-btn {
+    background-color: #f44336;
     color: white;
 }
 
 .approve-btn:hover {
-    background: #27ae60;
-}
-
-.reject-btn {
-    background: #e74c3c;
-    color: white;
+    background-color: #45a049;
 }
 
 .reject-btn:hover {
-    background: #c0392b;
+    background-color: #da190b;
 }
 
 .admin-notification {
@@ -137,11 +136,16 @@
     }
 }
 
-.no-items, .error {
+.error-message {
+    color: #f44336;
     text-align: center;
     padding: 20px;
+}
+
+.no-artworks {
+    text-align: center;
     color: #666;
-    font-style: italic;
+    padding: 20px;
 }
 
 .timestamp {

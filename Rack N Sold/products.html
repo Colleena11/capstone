@@ -5,13 +5,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rack N Sold</title>
     <link rel="stylesheet" href="css/productstyles.css">
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
-    <!-- Firebase services -->
-    <script src="javascripts/firebase.js"></script>
-    <script src="javascripts/products.js"></script>
+    <!-- Update Firebase SDK imports -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getStorage } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+        
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBnCDceh11o03SryLLfMPTvsB1ldE6yj2o",
+            authDomain: "rack-n--sold-c2bc0.firebaseapp.com",
+            projectId: "rack-n--sold-c2bc0",
+            storageBucket: "rack-n--sold-c2bc0.appspot.com",
+            messagingSenderId: "934643385207",
+            appId: "1:934643385207:web:507bd5cdc2dd7568c31772"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        // Make Firebase services available globally
+        window.firebaseApp = app;
+        window.firebaseAuth = auth;
+        window.firebaseDb = db;
+        window.firebaseStorage = storage;
+    </script>
+    <!-- Load your scripts after Firebase -->
+    <script src="javascripts/firebase.js" type="module"></script>
+    <script src="javascripts/products.js" type="module"></script>
+    <style>
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #f0f0f0;
+            margin-top: 8px;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .progress-bar::after {
+            content: '';
+            display: block;
+            width: 40%;
+            height: 100%;
+            background: #4CAF50;
+            animation: progress 1s infinite linear;
+        }
+        @keyframes progress {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(250%); }
+        }
+    </style>
 </head>
 <body>
     <div class="header">
@@ -27,108 +75,77 @@
                         <li><a href="products.html">Upload</a></li>
                         <li><a href="gallery.html">Gallery</a></li>
                         <li><a href="about.html">About</a></li>
+                        <li><a href="Accounts/accounts.html">Account</a></li>
                         <li><a href="contact.html">Contact</a></li>
-<<<<<<< HEAD
-                        <li><a href="../Rack N Sold/Accounts/accounts.html">Account</a></li>
-=======
-                        <li><a href="../Rack N Sold/Accounts/index.html">Account</a></li>
->>>>>>> e8deb359d12db4a0ab561bc2a1639ad9f394c527
                     </ul>
                 </nav>
                 <a href="cart.html">
                     <img src="images/cart.png" width="30px" height="30px">
                 </a>
             </div>
-<<<<<<< HEAD
+
         </div>
-=======
-<<<<<<< HEAD
-        </div>
-=======
-            <nav>
-                <ul>
-                    <li><a href="racknsold.html">Home</a></li>
-                    <li><a href="products.html">Products</a></li>
-                    <li><a href="about.html">About</a></li>
-                    <li><a href="">Contact</a></li>
-                    <li><a href="../Rack N Sold/Accounts/index.html">Account</a></li>
-                </ul>
-            </nav>
-            <a href="cart.html">
-                <img src="images/cart.png" width="30px" height="30px">
-            </a>
-        </div>
-   <div class="upload">
-    <div class="card">
-        <h2>Upload your art</h2>
-        <p class="review-notice">All submissions will be reviewed by admin before being published.</p>
-        <form id="artworkForm">
-            <img src="images/sample.png" id="photo-pic">
-            <label for="input-file">Upload Photo</label>
-            <input 
-                type="file" 
-                name="artwork"
-                accept="image/jpeg, image/png, image/jpg" 
-                id="input-file" 
-                required
-            >
-            
-            <div class="form-group">
-                <input type="text" id="artTitle" name="title" placeholder="Artwork Title" required>
-            </div>
-            <div class="form-group">
-                <input type="text" id="artistName" name="artist" placeholder="Artist Name" required>
-            </div>
-            <div class="form-group">
-                <input type="number" id="price" name="price" placeholder="Price" required>
-            </div>
-            <div class="form-group">
-                <textarea id="description" name="description" placeholder="Artwork Description" required></textarea>
-            </div>
-            <button type="submit">Submit Artwork</button>
-        </form>
->>>>>>> 58b177bb62c207a4305dbee5132ff78e36badeda
->>>>>>> e8deb359d12db4a0ab561bc2a1639ad9f394c527
     </div>
 
     <div class="upload">
         <div class="card">
             <h2>Upload your art</h2>
-            <form id="artworkForm">
-                <img src="images/sample.png" id="photo-pic">
-                <label for="input-file">Upload Photo</label>
-                <input 
-                    type="file" 
-                    name="artwork"
-                    accept="image/jpeg, image/png, image/jpg" 
-                    id="input-file" 
-                    required
-                >
-                
-                <div class="form-group">
-                    <input type="text" id="artTitle" name="title" placeholder="Artwork Title" required>
-                </div>
-                <div class="form-group">
-                    <input type="text" id="artistName" name="artist" placeholder="Artist Name" required>
-                </div>
-                <div class="form-group">
-                    <input type="number" id="price" name="price" placeholder="Price" required>
-                </div>
-                <div class="form-group">
-                    <textarea id="description" name="description" placeholder="Artwork Description" required></textarea>
-                </div>
-<<<<<<< HEAD
-                <button type="submit">Submit for Review</button>
-            </form>
-            <div id="submission-notice" style="margin-top: 15px; text-align: center;">
-                <p>Your artwork will be reviewed by our admin team before being published to the gallery.</p>
+            <div class="review-notice">
+                Note: All artwork submissions will be reviewed by an admin before appearing in the gallery.
             </div>
-=======
-                <button type="submit">Submit Artwork</button>
+            <form id="artworkForm">
+                <img src="images/sample.png" id="photo-pic" alt="Preview">
+                <div class="file-upload">
+                    <label for="input-file" class="upload-label">Choose Image</label>
+                    <input 
+                        type="file" 
+                        id="input-file" 
+                        name="file"
+                        accept="image/jpeg,image/png"
+                        required
+                    >
+                </div>
+                <div class="form-group">
+                    <label for="artTitle">Artwork Title</label>
+                    <input 
+                        type="text" 
+                        id="artTitle" 
+                        name="title"
+                        required
+                    >
+                </div>
+                <div class="form-group">
+                    <label for="artistName">Artist Name</label>
+                    <input 
+                        type="text" 
+                        id="artistName" 
+                        name="artist"
+                        required
+                    >
+                </div>
+                <div class="form-group">
+                    <label for="price">Price</label>
+                    <input 
+                        type="number" 
+                        id="price" 
+                        name="price"
+                        min="0" 
+                        step="0.01"
+                        required
+                    >
+                </div>
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea 
+                        id="description" 
+                        name="description"
+                        rows="4"
+                        required
+                    ></textarea>
+                </div>
+                <button type="submit" class="submit-btn">Upload Artwork</button>
             </form>
->>>>>>> e8deb359d12db4a0ab561bc2a1639ad9f394c527
         </div>
     </div>
-
 </body>
 </html>

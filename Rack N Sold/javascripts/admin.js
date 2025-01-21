@@ -1,110 +1,137 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const pendingContainer = document.getElementById('pending-container');
-    
-    // Set up real-time listener for pending artworks
-    function setupPendingArtworksListener() {
-        db.collection('pending_artworks')
-            .orderBy('submittedAt', 'desc')
-            .onSnapshot((snapshot) => {
-                console.log('Received pending artworks update');
-                
-                snapshot.docChanges().forEach((change) => {
-                    const artwork = { id: change.doc.id, ...change.doc.data() };
-                    
-                    if (change.type === 'added') {
-                        // Add new artwork to display
-                        addArtworkToDisplay(artwork);
-                    } else if (change.type === 'removed') {
-                        // Remove artwork from display
-                        removeArtworkFromDisplay(artwork.id);
-                    }
-                });
-            }, (error) => {
-                console.error('Error listening to pending artworks:', error);
-            });
-    }
-
-    function addArtworkToDisplay(artwork) {
-        const artworkElement = createArtworkElement(artwork);
-        pendingContainer.insertAdjacentHTML('afterbegin', artworkElement);
-    }
-
-    function removeArtworkFromDisplay(artworkId) {
-        const element = document.querySelector(`[data-id="${artworkId}"]`);
-        if (element) {
-            element.classList.add('fade-out');
-            setTimeout(() => element.remove(), 500);
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        // Make sure Firebase is initialized
+        if (!window.firebase) {
+            console.error('Firebase not initialized');
+            return;
         }
-    }
 
-    function createArtworkElement(artwork) {
-        return `
-            <div class="artwork-card" data-id="${artwork.id}">
-                <img src="${artwork.imageUrl}" alt="${artwork.title}" 
-                     onerror="this.src='../images/sample.png'">
-                <div class="artwork-details">
-                    <h3>${artwork.title || 'Untitled'}</h3>
-                    <p class="artist">By ${artwork.artist || 'Unknown Artist'}</p>
-                    <p class="price">$${(artwork.price || 0).toFixed(2)}</p>
-                    <p class="description">${artwork.description || 'No description provided'}</p>
-                    <p class="timestamp">Submitted: ${new Date(artwork.submittedAt?.toDate()).toLocaleString()}</p>
-                    <div class="action-buttons">
-                        <button class="approve-btn" onclick="handleArtwork('${artwork.id}', 'approved')">
-                            Approve
-                        </button>
-                        <button class="reject-btn" onclick="handleArtwork('${artwork.id}', 'rejected')">
-                            Decline
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
-    // Initialize
-    setupPendingArtworksListener();
-    console.log('Admin dashboard initialized');
-
-    window.handleArtwork = async (artworkId, status) => {
-        try {
-            const card = document.querySelector(`[data-id="${artworkId}"]`);
-            if (card) {
-                card.classList.add('processing');
-            }
-
-            await window.firebaseServices.verifyArtwork(artworkId, status);
-            
-            // Add fade-out animation
-            if (card) {
-                card.classList.add('fade-out');
-                setTimeout(() => {
-                    card.remove();
-                    // Check if no more pending items
-                    if (!pendingContainer.children.length) {
-                        pendingContainer.innerHTML = '<p class="no-items">No pending artworks</p>';
-                    }
-                }, 500);
-            }
-
-            // Show notification
-            showNotification(`Artwork ${status === 'approved' ? 'approved' : 'declined'} successfully`, 'success');
-        } catch (error) {
-            console.error('Action failed:', error);
-            showNotification('Error processing artwork', 'error');
-            if (card) {
-                card.classList.remove('processing');
-            }
-        }
-    };
-
-    function showNotification(message, type) {
-        const notification = document.createElement('div');
-        notification.className = `admin-notification ${type}`;
-        notification.textContent = message;
-        document.body.appendChild(notification);
-        
-        setTimeout(() => {
-            notification.remove();
-        }, 3000);
+        await loadPendingArtworks();
+    } catch (error) {
+        console.error('Error initializing admin page:', error);
+        document.getElementById('pending-container').innerHTML = 
+            '<p class="error-message">Failed to load pending artworks. Please try again later.</p>';
     }
 });
+
+async function loadPendingArtworks() {
+    try {
+        const snapshot = await firebase.firestore()
+            .collection('pending_artworks')
+            .get();
+
+        const artworks = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+
+        displayPendingArtworks(artworks);
+    } catch (error) {
+        console.error('Error loading pending artworks:', error);
+        throw error;
+    }
+}
+
+function displayPendingArtworks(artworks) {
+    const container = document.getElementById('pending-container');
+    
+    if (!artworks || artworks.length === 0) {
+        container.innerHTML = '<p class="no-artworks">No pending artworks.</p>';
+        return;
+    }
+
+    const artworksHTML = artworks.map(artwork => `
+        <div class="artwork-card" data-id="${artwork.id}">
+            <img src="${artwork.imageUrl}" alt="${artwork.title}">
+            <div class="artwork-details">
+                <h3>${artwork.title}</h3>
+                <p>Artist: ${artwork.artist}</p>
+                <p>Price: $${artwork.price}</p>
+                <p>${artwork.description}</p>
+                <div class="action-buttons">
+                    <button onclick="approveArtwork('${artwork.id}')" class="approve-btn">Approve</button>
+                    <button onclick="rejectArtwork('${artwork.id}')" class="reject-btn">Reject</button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+
+    container.innerHTML = artworksHTML;
+}
+
+async function approveArtwork(artworkId) {
+    try {
+        const db = firebase.firestore();
+        
+        // Get the artwork data from pending collection
+        const artworkDoc = await db.collection('pending_artworks').doc(artworkId).get();
+        if (!artworkDoc.exists) {
+            throw new Error('Artwork not found');
+        }
+
+        const artworkData = artworkDoc.data();
+
+        // Add to artworks collection (for gallery display)
+        await db.collection('artworks').add({
+            ...artworkData,
+            status: 'approved',
+            approvedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        // Delete from pending collection
+        await db.collection('pending_artworks').doc(artworkId).delete();
+
+        // Remove the artwork card from the DOM
+        const artworkCard = document.querySelector(`.artwork-card[data-id="${artworkId}"]`);
+        if (artworkCard) {
+            artworkCard.remove();
+        }
+
+        alert('Artwork approved successfully!');
+        
+        // Refresh the pending artworks display
+        await loadPendingArtworks();
+    } catch (error) {
+        console.error('Error approving artwork:', error);
+        alert('Failed to approve artwork. Please try again.');
+    }
+}
+
+async function rejectArtwork(artworkId) {
+    if (confirm('Are you sure you want to reject this artwork?')) {
+        try {
+            const db = firebase.firestore();
+            
+            // Get the artwork reference
+            const artworkRef = db.collection('pending_artworks').doc(artworkId);
+            
+            // Get the artwork data to delete the image if needed
+            const artworkDoc = await artworkRef.get();
+            const artworkData = artworkDoc.data();
+
+            // If there's an image URL, delete it from storage
+            if (artworkData.imageUrl && artworkData.imageUrl.startsWith('https://firebasestorage.googleapis.com')) {
+                const storage = firebase.storage();
+                const imageRef = storage.refFromURL(artworkData.imageUrl);
+                await imageRef.delete();
+            }
+
+            // Delete the document from Firestore
+            await artworkRef.delete();
+
+            // Remove the artwork card from the DOM
+            const artworkCard = document.querySelector(`.artwork-card[data-id="${artworkId}"]`);
+            if (artworkCard) {
+                artworkCard.remove();
+            }
+
+            alert('Artwork rejected and removed.');
+            
+            // Refresh the pending artworks display
+            await loadPendingArtworks();
+        } catch (error) {
+            console.error('Error rejecting artwork:', error);
+            alert('Failed to reject artwork. Please try again.');
+        }
+    }
+}

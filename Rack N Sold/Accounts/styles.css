@@ -165,3 +165,235 @@ body {
 .nav-links a.active {
     background-color: rgba(255, 255, 255, 0.2);
 }
+
+.modal {
+    display: none;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.95);
+    z-index: 9999;
+    overflow-y: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal-content {
+    background: #ffffff;
+    padding: 60px 80px;
+    width: 100%;
+    max-width: 1000px;
+    border-radius: 30px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    position: relative;
+    animation: modalAppear 0.5s ease-out;
+}
+
+@keyframes modalAppear {
+    from {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal-content h2 {
+    color: #2a9d8f;
+    text-align: center;
+    margin-bottom: 50px;
+    font-size: 48px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    position: relative;
+    padding-bottom: 20px;
+}
+
+.modal-content h2::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 5px;
+    background: linear-gradient(to right, #2a9d8f, #248a7e);
+    border-radius: 5px;
+}
+
+#registrationForm {
+    max-width: 850px;
+    margin: 0 auto;
+    background: linear-gradient(145deg, #ffffff, #f8f9fa);
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+}
+
+.form-group {
+    margin-bottom: 35px;
+    position: relative;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 22px 30px 22px 70px;
+    border: 3px solid #e8e8e8;
+    border-radius: 16px;
+    font-size: 18px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    background-color: #ffffff;
+    color: #333;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.01);
+}
+
+.form-group input:focus {
+    border-color: #2a9d8f;
+    outline: none;
+    box-shadow: 0 0 0 5px rgba(42, 157, 143, 0.1);
+    transform: translateY(-2px);
+}
+
+.form-group input::placeholder {
+    color: #aaa;
+    font-size: 16px;
+    font-weight: 400;
+}
+
+.form-group::before {
+    content: '';
+    position: absolute;
+    left: 25px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 30px;
+    height: 30px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0.8;
+    z-index: 1;
+}
+
+.close {
+    position: absolute;
+    right: 40px;
+    top: 40px;
+    font-size: 50px;
+    font-weight: bold;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 70px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: #f8f9fa;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.close:hover {
+    color: #2a9d8f;
+    background-color: rgba(42, 157, 143, 0.1);
+    transform: rotate(90deg);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.error-message {
+    color: #dc3545;
+    background-color: #fff5f5;
+    border: 2px solid #ffebeb;
+    padding: 20px 25px;
+    border-radius: 15px;
+    margin: 25px 0;
+    display: none;
+    text-align: center;
+    font-size: 16px;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.1);
+}
+
+#registrationForm .btn {
+    width: 100%;
+    padding: 25px;
+    background: linear-gradient(145deg, #2a9d8f, #248a7e);
+    color: white;
+    border: none;
+    border-radius: 16px;
+    font-size: 22px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 40px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    box-shadow: 0 10px 30px rgba(42, 157, 143, 0.3);
+}
+
+#registrationForm .btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 35px rgba(42, 157, 143, 0.4);
+    background: linear-gradient(145deg, #248a7e, #1e7268);
+}
+
+#registrationForm .btn:active {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 30px rgba(42, 157, 143, 0.3);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .modal-content {
+        padding: 40px;
+    }
+    
+    .modal-content h2 {
+        font-size: 36px;
+        margin-bottom: 35px;
+    }
+    
+    #registrationForm {
+        padding: 20px;
+    }
+    
+    .form-group input {
+        padding: 18px 25px 18px 60px;
+        font-size: 16px;
+    }
+    
+    #registrationForm .btn {
+        padding: 20px;
+        font-size: 18px;
+    }
+    
+    .close {
+        right: 20px;
+        top: 20px;
+        width: 50px;
+        height: 50px;
+        font-size: 40px;
+    }
+}
+
+/* Add hover effect for form groups */
+.form-group:hover input {
+    border-color: #aaa;
+}
+
+/* Add focus effect for the entire form group */
+.form-group:focus-within {
+    transform: translateY(-2px);
+}
+
+/* Add subtle transition for form groups */
+.form-group {
+    transition: all 0.3s ease;
+}
