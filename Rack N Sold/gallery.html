@@ -9,6 +9,24 @@
     <!-- Import Firebase and gallery scripts -->
     <script type="module" src="javascripts/firebase.js"></script>
     <script type="module" src="javascripts/gallery.js"></script>
+    <style>
+        .artwork-card {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px;
+            text-align: center;
+        }
+        .artwork-card img {
+            max-width: 200px;
+            height: auto;
+        }
+        .artworks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+    </style>
 </head>
 <body>
     <div class="header">
@@ -28,9 +46,6 @@
                         <li><a href="contact.html">Contact</a></li>
                     </ul>
                 </nav>
-                <a href="cart.html">
-                    <img src="images/cart.png" width="30px" height="30px">
-                </a>
             </div>
         </div>
     </div>

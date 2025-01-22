@@ -1,144 +1,40 @@
 // Import Firebase services from firebase.js
 import { db, auth } from './firebase.js';
-import { collection, getDocs, addDoc, query, where, orderBy, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { collection, getDocs, addDoc, query, where, orderBy, doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import firebaseServices from './firebase.js';
 
-document.addEventListener('DOMContentLoaded', async () => {
+async function displayArtworks() {
     const container = document.getElementById('artworks-container');
-    
+    container.innerHTML = 'Loading...';
+
     try {
-        // Show loading state
-        container.innerHTML = '<p class="loading">Loading artworks...</p>';
+        console.log('Fetching artworks...');
+        const artworks = await firebaseServices.getArtworks();
+        console.log('Fetched artworks:', artworks);
 
-        console.log('Loading approved artworks...');
-        
-        // Create query using the imported Firestore methods
-        const artworksRef = collection(db, 'approved_artworks');
-        const artworksQuery = query(
-            artworksRef,
-            orderBy('approvedAt', 'desc')
-        );
-            
-        try {
-            const snapshot = await getDocs(artworksQuery);
-            const artworks = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
-            console.log('Fetched approved artworks:', artworks);
-            displayArtworks(artworks);
-        } catch (orderError) {
-            if (orderError.code === 'failed-precondition') {
-                // If index doesn't exist, fetch without ordering
-                console.log('Fetching without ordering (index not ready)');
-                const basicQuery = query(artworksRef);
-                const snapshot = await getDocs(basicQuery);
-                const artworks = snapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
-                displayArtworks(artworks);
-                
-                // Show index creation message
-                showNotification(
-                    'Gallery is being optimized. Some features may be limited temporarily.',
-                    'info'
-                );
-            } else {
-                throw orderError;
-            }
-        }
-    } catch (error) {
-        console.error('Error loading artworks:', error);
-        if (error.code === 'failed-precondition' || error.code === 'resource-exhausted') {
-            container.innerHTML = `
-                <p class="error-message">
-                    Setting up the gallery. Please wait a few minutes and try again.
-                    <br>
-                    <small>First-time setup in progress...</small>
-                </p>`;
-        } else {
-            container.innerHTML = 
-                '<p class="error-message">Failed to load artworks. Please try again later.</p>';
-        }
-    }
-});
-
-function displayArtworks(artworks) {
-    const container = document.getElementById('artworks-container');
-    
-    if (!artworks || artworks.length === 0) {
-        container.innerHTML = '<p class="no-artworks">No artworks available.</p>';
-        return;
-    }
-
-    const artworksHTML = artworks.map(artwork => createArtworkCard(artwork)).join('');
-    container.innerHTML = artworksHTML;
-}
-
-function createArtworkCard(artwork) {
-    return `
-        <div class="artwork-card" data-id="${artwork.id}">
-            <div class="artwork-image">
-                <img src="${artwork.imageUrl || '../../images/sample.png'}" 
-                     alt="${artwork.title}"
-                     onerror="this.src='images/sample.png'">
-            </div>
-            <div class="artwork-details">
-                <h3>${artwork.title}</h3>
-                <p class="artist">By ${artwork.artist}</p>
-                <p class="price">$${artwork.price.toFixed(2)}</p>
-                <p class="description">${artwork.description}</p>
-                <button onclick="addToCart('${artwork.id}')" class="add-to-cart-btn">
-                    Add to Cart
-                </button>
-            </div>
-        </div>
-    `;
-}
-
-// Update addToCart function to use proper Firestore methods
-window.addToCart = async (artworkId) => {
-    try {
-        const user = auth.currentUser;
-        if (!user) {
-            showNotification('Please login to add items to cart', 'error');
+        if (!artworks || artworks.length === 0) {
+            container.innerHTML = '<p>No artworks available.</p>';
             return;
         }
 
-        // Get the artwork details from approved_artworks collection
-        const artworkRef = doc(db, 'approved_artworks', artworkId);
-        const artworkDoc = await getDoc(artworkRef);
-        
-        if (!artworkDoc.exists()) {
-            throw new Error('Artwork not found');
-        }
+        container.innerHTML = artworks.map(artwork => `
+            <div class="artwork-card">
+                <img src="${artwork.imageUrl || 'images/placeholder.png'}" alt="${artwork.title}">
+                <h3>${artwork.title}</h3>
+                <p class="artist">Artist: ${artwork.artist}</p>
+                <p class="price">$${artwork.price}</p>
+                <p class="description">${artwork.description}</p>
+            </div>
+        `).join('');
 
-        const artworkData = artworkDoc.data();
-
-        // Create a cart item with all necessary fields
-        const cartItem = {
-            userId: user.uid,
-            artworkId: artworkId,
-            title: artworkData.title || 'Untitled',
-            price: Number(artworkData.price) || 0,
-            artist: artworkData.artist || 'Unknown Artist',
-            description: artworkData.description || '',
-            addedAt: new Date().toISOString(), // Use ISO string for consistent date format
-            quantity: 1,
-            // Include these additional fields for display
-            imageUrl: artworkData.imageUrl || null
-        };
-
-        // Add to cart collection
-        const cartRef = collection(db, 'cart');
-        await addDoc(cartRef, cartItem);
-
-        showNotification('Added to cart successfully!', 'success');
     } catch (error) {
-        console.error('Add to cart failed:', error);
-        showNotification('Failed to add to cart: ' + error.message, 'error');
+        console.error('Error displaying artworks:', error);
+        container.innerHTML = '<p>Error loading artworks.</p>';
     }
-};
+}
+
+// Initialize gallery when page loads
+document.addEventListener('DOMContentLoaded', displayArtworks);
 
 function showNotification(message, type) {
     const notification = document.createElement('div');

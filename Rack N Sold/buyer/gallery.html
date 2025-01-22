@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Art Gallery - Rack N Sold</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="./css/gallery.css">
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <div class="navbar">
+                <div class="logo">
+                    <img src="../images/logo.png" alt="80px">
+                    <h1>Rack N Sold</h1>
+                </div>
+                <nav>
+                    <ul>
+                        <li><a href="home.html">Home</a></li>
+                        <li><a href="gallery.html" class="active">Gallery</a></li>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="account.html">Account</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </nav>
+                <a href="cart.html">
+                    <img src="../images/cart.png" width="30px" height="30px">
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="gallery-container">
+        <h2>Art Gallery</h2>
+        <div id="artworks-grid" class="artworks-grid">
+            <!-- Artworks will be loaded here -->
+            <div class="loading">Loading artworks...</div>
+        </div>
+    </div>
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    <script src="../javascripts/firebase-config.js"></script>
+    <script src="./js/auth.js"></script>
+    <script src="./js/gallery.js"></script>
+</body>
+</html>

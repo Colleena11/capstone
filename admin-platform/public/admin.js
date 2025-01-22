@@ -1,4 +1,4 @@
-import { db, auth } from './firebase.js';
+import firebaseServices, { db, auth } from '../../Rack N Sold/javascripts/firebase.js';
 import { 
     collection, 
     query, 
@@ -16,14 +16,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const pendingContainer = document.getElementById('pending-container');
     const approvedContainer = document.getElementById('approved-container');
 
-    if (!db) {
-        console.error('Firestore not initialized');
+    if (!firebaseServices) {
+        console.error('Firebase services not initialized');
         return;
     }
 
-    // Set up listener for pending artworks
+    // Set up listener for pending artworks (changed from 'artworks' to include status filter)
     const pendingRef = collection(db, 'artworks');
-    const pendingQuery = query(pendingRef, orderBy('createdAt', 'desc'));
+    const pendingQuery = query(
+        pendingRef, 
+        orderBy('createdAt', 'desc')
+    );
 
     // Set up listener for approved artworks
     const approvedRef = collection(db, 'approved_artworks');
@@ -32,13 +35,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Listen for pending artworks
     onSnapshot(pendingQuery, (snapshot) => {
         pendingContainer.innerHTML = '';
-        snapshot.forEach((doc) => {
-            const artwork = { id: doc.id, ...doc.data() };
-            const artworkElement = createArtworkElement(artwork);
-            pendingContainer.insertAdjacentHTML('beforeend', artworkElement);
-        });
+        snapshot.docs
+            .filter(doc => !doc.data().status || doc.data().status === 'pending')
+            .forEach((doc) => {
+                const artwork = { id: doc.id, ...doc.data() };
+                const artworkElement = createArtworkElement(artwork);
+                pendingContainer.insertAdjacentHTML('beforeend', artworkElement);
+            });
 
-        if (snapshot.empty) {
+        if (pendingContainer.innerHTML === '') {
             pendingContainer.innerHTML = '<p class="no-items">No pending artworks</p>';
         }
     });
@@ -106,49 +111,28 @@ function createApprovedArtworkElement(artwork) {
     `;
 }
 
-// Update the handleApproval function
+// Simplified handleApproval function
 window.handleApproval = async function(artworkId, isApproved) {
     try {
-        const artworkRef = doc(db, 'artworks', artworkId);
-        const artworkSnap = await getDoc(artworkRef);
+        if (!auth.currentUser) {
+            showNotification('Please sign in first', 'error');
+            return;
+        }
+
+        showNotification('Processing...', 'info');
         
-        if (!artworkSnap.exists()) {
-            throw new Error('Artwork not found');
-        }
-
-        const artworkData = artworkSnap.data();
-
-        if (isApproved) {
-            // First create in approved_artworks
-            const approvedArtworkData = {
-                ...artworkData,
-                status: 'approved',
-                createdAt: serverTimestamp(),
-                approvedAt: serverTimestamp(),
-                approvedBy: auth.currentUser.uid,
-                submittedAt: artworkData.createdAt // preserve original submission time
-            };
-            
-            // Add to approved_artworks first
-            await addDoc(collection(db, 'approved_artworks'), approvedArtworkData);
-            
-            // Then delete from pending artworks
-            await deleteDoc(artworkRef);
-            showNotification('Artwork approved successfully', 'success');
-        } else {
-            // Just delete rejected artwork
-            await deleteDoc(artworkRef);
-            showNotification('Artwork rejected and removed', 'success');
-        }
-
-        const element = document.querySelector(`[data-id="${artworkId}"]`);
-        if (element) {
-            element.classList.add('fade-out');
-            setTimeout(() => element.remove(), 500);
-        }
+        await firebaseServices.verifyArtwork(artworkId, isApproved ? 'approved' : 'rejected');
+        
+        showNotification(
+            `Artwork ${isApproved ? 'approved' : 'rejected'} successfully!`, 
+            'success'
+        );
     } catch (error) {
-        console.error('Approval/Rejection failed:', error);
-        showNotification('Error processing artwork: ' + error.message, 'error');
+        console.error('Approval error:', error);
+        showNotification(
+            `Error: ${error.message || 'Failed to process artwork'}`, 
+            'error'
+        );
     }
 };
 
@@ -269,4 +253,4 @@ style.textContent = `
         color: #e74c3c;
     }
 `;
-document.head.appendChild(style); 
+document.head.appendChild(style);

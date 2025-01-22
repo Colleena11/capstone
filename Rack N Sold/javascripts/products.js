@@ -58,9 +58,9 @@ function waitForFirebase(maxAttempts = 10) {
 
                 const result = await window.firebaseServices.uploadArtwork(formData);
                 
-                // Show success and redirect
+                // Show success and refresh page
                 alert('Artwork information saved successfully!');
-                window.location.href = '../admin-platform/public/admin.html';
+                window.location.reload();
             } catch (error) {
                 console.error('Upload failed:', error);
                 alert('Upload failed: ' + error.message);

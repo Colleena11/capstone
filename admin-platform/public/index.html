@@ -5,42 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Platform - Rack N Sold</title>
     <link rel="stylesheet" href="../../Rack N Sold/css/admin.css">
-    <!-- Update Firebase SDK -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getStorage } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyBnCDceh11o03SryLLfMPTvsB1ldE6yj2o",
-            authDomain: "rack-n--sold-c2bc0.firebaseapp.com",
-            projectId: "rack-n--sold-c2bc0",
-            storageBucket: "rack-n--sold-c2bc0.appspot.com",
-            messagingSenderId: "934643385207",
-            appId: "1:934643385207:web:507bd5cdc2dd7568c31772"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        const storage = getStorage(app);
-
-        window.db = db;
-        window.auth = auth;
-        window.storage = storage;
-
-        // Check auth state immediately
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                console.log('Current user UID:', user.uid);
-                console.log('Current user email:', user.email);
-            } else {
-                console.log('No user signed in');
-                window.location.href = '../../Rack N Sold/Accounts/accounts.html'; // Redirect to login
-            }
-        });
-    </script>
+    <!-- Replace the Firebase initialization script with import of firebase.js -->
+    <script type="module" src="../../Rack N Sold/javascripts/firebase.js"></script>
 </head>
 <body>
     <div class="admin-header">

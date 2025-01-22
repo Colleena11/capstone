@@ -3,7 +3,15 @@ import {
     getFirestore, 
     collection, 
     addDoc, 
-    serverTimestamp 
+    serverTimestamp,
+    getDocs,
+    query,
+    orderBy,
+    doc,  // Add this
+    getDoc,  // Add this
+    updateDoc,  // Add this
+    writeBatch,
+    deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
@@ -100,15 +108,24 @@ const firebaseServices = {
 
     getArtworks: async function() {
         try {
-            const snapshot = await dbRef.collection('artworks')
-                .orderBy('createdAt', 'desc')
-                .get();
-            return snapshot.docs.map(doc => ({
+            const approvedArtworksRef = collection(db, 'approved_artworks');
+            const artworksQuery = query(approvedArtworksRef, orderBy('createdAt', 'desc'));
+            const snapshot = await getDocs(artworksQuery);
+            
+            if (snapshot.empty) {
+                console.log('No approved artworks found');
+                return [];
+            }
+
+            const artworks = snapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
             }));
+            
+            console.log('Fetched approved artworks:', artworks);
+            return artworks;
         } catch (error) {
-            console.error('Fetch error:', error);
+            console.error('Error fetching approved artworks:', error);
             return [];
         }
     },
@@ -116,15 +133,15 @@ const firebaseServices = {
     addToCart: async function(artworkId) {
         try {
             // Get the artwork details
-            const artworkDoc = await dbRef.collection('artworks').doc(artworkId).get();
-            if (!artworkDoc.exists) {
+            const artworkDoc = await getDoc(doc(dbRef, 'artworks', artworkId));
+            if (!artworkDoc.exists()) {
                 throw new Error('Artwork not found');
             }
 
             const artworkData = artworkDoc.data();
             
             // Add to cart collection
-            await dbRef.collection('cart').add({
+            await addDoc(collection(dbRef, 'cart'), {
                 artworkId: artworkId,
                 title: artworkData.title,
                 artist: artworkData.artist,
@@ -142,9 +159,7 @@ const firebaseServices = {
 
     getCartItems: async function() {
         try {
-            const snapshot = await dbRef.collection('cart')
-                .orderBy('addedAt', 'desc')
-                .get();
+            const snapshot = await getDocs(query(collection(dbRef, 'cart'), orderBy('addedAt', 'desc')));
             
             return snapshot.docs.map(doc => ({
                 cartId: doc.id,
@@ -158,7 +173,7 @@ const firebaseServices = {
 
     removeFromCart: async function(cartItemId) {
         try {
-            await dbRef.collection('cart').doc(cartItemId).delete();
+            await deleteDoc(doc(dbRef, 'cart', cartItemId));
             return { success: true };
         } catch (error) {
             console.error('Error removing from cart:', error);
@@ -169,7 +184,7 @@ const firebaseServices = {
     deleteArtwork: async function(artworkId) {
         try {
             // Get artwork data first to get the image URL
-            const artworkDoc = await dbRef.collection('artworks').doc(artworkId).get();
+            const artworkDoc = await getDoc(doc(dbRef, 'artworks', artworkId));
             const artworkData = artworkDoc.data();
 
             // Delete the image from Storage if it exists
@@ -179,7 +194,7 @@ const firebaseServices = {
             }
 
             // Delete the document from Firestore
-            await dbRef.collection('artworks').doc(artworkId).delete();
+            await deleteDoc(doc(dbRef, 'artworks', artworkId));
 
             return { success: true, message: 'Artwork deleted successfully' };
         } catch (error) {
@@ -191,9 +206,7 @@ const firebaseServices = {
     getPendingArtworks: async function() {
         try {
             console.log('Fetching pending artworks...');
-            const snapshot = await dbRef.collection('pending_artworks')
-                .orderBy('submittedAt', 'desc')
-                .get();
+            const snapshot = await getDocs(query(collection(dbRef, 'pending_artworks'), orderBy('submittedAt', 'desc')));
 
             return snapshot.docs.map(doc => ({
                 id: doc.id,
@@ -207,29 +220,50 @@ const firebaseServices = {
 
     verifyArtwork: async function(artworkId, status) {
         try {
-            const artworkRef = dbRef.collection('pending_artworks').doc(artworkId);
-            const artworkDoc = await artworkRef.get();
+            if (!auth.currentUser) {
+                throw new Error('User must be signed in');
+            }
+
+            console.log('Starting verification process for artwork:', artworkId);
             
-            if (!artworkDoc.exists) {
+            const artworkRef = doc(db, 'artworks', artworkId);
+            const artworkDoc = await getDoc(artworkRef);
+            
+            if (!artworkDoc.exists()) {
                 throw new Error('Artwork not found');
             }
 
             const artworkData = artworkDoc.data();
-            
-            if (status === 'approved') {
-                // Move to approved artworks collection
-                await dbRef.collection('artworks').add({
-                    ...artworkData,
-                    status: 'approved',
-                    verificationStatus: 'approved',
-                    verifiedAt: serverTimestamp()
-                });
-            }
+            console.log('Found artwork:', artworkData);
 
-            // Delete from pending collection
-            await artworkRef.delete();
-            
-            return { success: true };
+            try {
+                if (status === 'approved') {
+                    // First add to approved_artworks
+                    const newApprovedRef = await addDoc(collection(db, 'approved_artworks'), {
+                        ...artworkData,
+                        status: 'approved',
+                        verificationStatus: 'approved',
+                        verifiedAt: serverTimestamp(),
+                        createdAt: serverTimestamp(),
+                        originalId: artworkId,
+                        verifiedBy: auth.currentUser.uid
+                    });
+                    console.log('Added to approved_artworks:', newApprovedRef.id);
+                    
+                    // Then delete from original collection
+                    await deleteDoc(artworkRef);
+                    console.log('Deleted from artworks collection');
+                } else {
+                    // Just delete rejected artwork
+                    await deleteDoc(artworkRef);
+                    console.log('Rejected artwork deleted');
+                }
+                
+                return { success: true };
+            } catch (error) {
+                console.error('Error during verification:', error);
+                throw new Error('Failed to update artwork status: ' + error.message);
+            }
         } catch (error) {
             console.error('Verification failed:', error);
             throw error;
@@ -247,34 +281,16 @@ console.log('Firebase initialized with services:', !!window.firebaseServices);
 // Function to handle artwork submission
 async function submitArtwork(artworkData) {
     try {
-        // Add to pending_artworks collection
-        await dbRef.collection('pending_artworks').add({
+        const artworksRef = collection(db, 'artworks');
+        await addDoc(artworksRef, {
             ...artworkData,
-            status: 'pending',
-            submittedAt: serverTimestamp()
+            createdAt: serverTimestamp()
         });
         return true;
     } catch (error) {
         console.error('Error submitting artwork:', error);
         return false;
     }
-}
-
-// Function to handle admin approval
-async function verifyArtwork(artworkId, status) {
-    const artworkRef = dbRef.collection('pending_artworks').doc(artworkId);
-    const artwork = await artworkRef.get();
-    
-    if (status === 'approved') {
-        // Move to approved_artworks collection
-        await dbRef.collection('approved_artworks').add({
-            ...artwork.data(),
-            approvedAt: serverTimestamp()
-        });
-    }
-    
-    // Remove from pending
-    await artworkRef.delete();
 }
 
 console.log('Firebase services ready');
