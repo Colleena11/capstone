@@ -1,13 +1,24 @@
 document.addEventListener('DOMContentLoaded', async () => {
+    // Show loading state
+    setLoadingState(true);
     try {
         const user = await checkBuyerAuth();
-        loadUserProfile(user);
+        await loadUserProfile(user);
         setupEventListeners();
     } catch (error) {
         console.error('Auth error:', error);
-        window.location.href = '../Accounts/accounts.html';
+        window.location.href = 'login.html'; // Changed from '../account.html'
+    } finally {
+        setLoadingState(false);
     }
 });
+
+function setLoadingState(isLoading) {
+    const elements = ['userName', 'userEmail', 'memberSince'];
+    elements.forEach(id => {
+        document.getElementById(id).textContent = isLoading ? 'Loading...' : '';
+    });
+}
 
 async function loadUserProfile(user) {
     try {
@@ -16,39 +27,75 @@ async function loadUserProfile(user) {
             .doc(user.uid)
             .get();
 
+        if (!userDoc.exists) {
+            throw new Error('User profile not found');
+        }
+
         const userData = userDoc.data();
         
-        document.getElementById('userName').textContent = userData.username || 'N/A';
-        document.getElementById('userEmail').textContent = user.email;
-        document.getElementById('memberSince').textContent = new Date(user.metadata.creationTime).toLocaleDateString();
+        // Update profile information with validation
+        document.getElementById('userName').textContent = userData.username || 'No username set';
+        document.getElementById('userEmail').textContent = user.email || 'No email available';
+        document.getElementById('memberSince').textContent = user.metadata.creationTime ? 
+            new Date(user.metadata.creationTime).toLocaleDateString() : 'Unknown';
         
         if (userData.profileImage) {
-            document.getElementById('profileImage').src = userData.profileImage;
+            const profileImg = document.getElementById('profileImage');
+            profileImg.src = userData.profileImage;
+            profileImg.onerror = () => {
+                profileImg.src = '../images/default-profile.png';
+            };
         }
     } catch (error) {
         console.error('Error loading profile:', error);
-        alert('Failed to load profile information');
+        showError('Failed to load profile information. Please try again later.');
     }
 }
 
 function setupEventListeners() {
-    document.getElementById('editProfileBtn').addEventListener('click', () => {
-        // Implement edit profile functionality
-        alert('Edit profile feature coming soon!');
+    // Edit Profile
+    document.getElementById('editProfileBtn').addEventListener('click', async () => {
+        try {
+            const user = firebase.auth().currentUser;
+            if (!user) throw new Error('No user logged in');
+
+            // Add your edit profile logic here
+            const newUsername = prompt('Enter new username:');
+            if (newUsername) {
+                await firebase.firestore()
+                    .collection('users')
+                    .doc(user.uid)
+                    .update({ username: newUsername });
+                document.getElementById('userName').textContent = newUsername;
+                showSuccess('Profile updated successfully!');
+            }
+        } catch (error) {
+            console.error('Edit profile error:', error);
+            showError('Failed to update profile');
+        }
     });
 
+    // Order History
     document.getElementById('orderHistoryBtn').addEventListener('click', () => {
-        // Implement order history functionality
-        alert('Order history feature coming soon!');
+        window.location.href = 'order-history.html';
     });
 
+    // Logout
     document.getElementById('logoutBtn').addEventListener('click', async () => {
         try {
             await firebase.auth().signOut();
-            window.location.href = '../Accounts/accounts.html';
+            window.location.href = 'login.html';
         } catch (error) {
             console.error('Logout error:', error);
-            alert('Failed to logout');
+            showError('Failed to logout. Please try again.');
         }
     });
+}
+
+function showError(message) {
+    alert(message); // Replace with better UI notification system
+}
+
+function showSuccess(message) {
+    alert(message); // Replace with better UI notification system
 }

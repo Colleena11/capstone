@@ -5,8 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Platform - Rack N Sold</title>
     <link rel="stylesheet" href="../../Rack N Sold/css/admin.css">
-    <!-- Replace the Firebase initialization script with import of firebase.js -->
-    <script type="module" src="../../Rack N Sold/javascripts/firebase.js"></script>
+    
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/auth.js"></script>
+    
+    <script>
+        // Immediate check for authentication
+        firebase.auth().onAuthStateChanged((user) => {
+            if (!user || user.email !== 'admin@gmail.com') {
+                console.log('No admin user, redirecting to login');
+                window.location.replace('login.html');
+            } else {
+                console.log('Admin authenticated:', user.email);
+            }
+        });
+    </script>
 </head>
 <body>
     <div class="admin-header">
