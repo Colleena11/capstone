@@ -1,10 +1,23 @@
+// Initialize gallery when DOM is loaded
 document.addEventListener('DOMContentLoaded', async () => {
     try {
-        // Check if user is authenticated as buyer
-        await checkBuyerAuth();
+        // Check if user is logged in
+        const user = firebase.auth().currentUser;
+        if (!user) {
+            // Wait briefly to see if auth state updates
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Check again after waiting
+            if (!firebase.auth().currentUser) {
+                window.location.href = './login.html';
+                return;
+            }
+        }
+        
+        // Load artworks
         loadApprovedArtworks();
     } catch (error) {
-        console.error('Auth error:', error);
+        console.error('Gallery initialization error:', error);
         window.location.href = './login.html';
     }
 });
@@ -13,6 +26,21 @@ async function loadApprovedArtworks() {
     const artworksGrid = document.getElementById('artworks-grid');
     
     try {
+        const user = firebase.auth().currentUser;
+        if (!user) {
+            window.location.href = './login.html';
+            return;
+        }
+
+        // Verify buyer role
+        const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
+        const userData = userDoc.data();
+        
+        if (!userData || userData.role !== 'buyer') {
+            window.location.href = './login.html';
+            return;
+        }
+
         const snapshot = await firebase.firestore()
             .collection('approved_artworks')
             .orderBy('createdAt', 'desc')
@@ -54,11 +82,11 @@ async function addToCart(artworkId) {
     try {
         const user = firebase.auth().currentUser;
         if (!user) {
-            alert('Please login to add items to cart');
+            window.location.href = './login.html';
             return;
         }
 
-        // Get artwork details first
+        // Get artwork details
         const artworkDoc = await firebase.firestore()
             .collection('approved_artworks')
             .doc(artworkId)
@@ -70,7 +98,7 @@ async function addToCart(artworkId) {
 
         const artworkData = artworkDoc.data();
 
-        // Add to cart with all required fields
+        // Add to cart
         await firebase.firestore().collection('cart').add({
             artworkId: artworkId,
             userId: user.uid,

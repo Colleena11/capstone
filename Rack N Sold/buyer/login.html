@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Buyer Login - Rack N Sold</title>
     <link rel="stylesheet" href="../css/styles.css">
-    <link rel="stylesheet" href="../css/productstyles.css">
     <link rel="stylesheet" href="./css/buyer-login.css">
 </head>
 <body>
@@ -18,7 +17,7 @@
                 </div>
                 <nav>
                     <ul>
-                        <li><a href="home.html">Home</a></li>
+                        <li><a href="../racknsold.html">Home</a></li>
                         <li><a href="gallery.html">Gallery</a></li>
                         <li><a href="about.html">About</a></li>
                         <li><a href="login.html" class="active">Account</a></li>
@@ -33,29 +32,86 @@
     </div>
 
     <div class="login-container">
-        <div class="login-box">
+        <div id="profileCard" class="profile-card" style="display: none;">
+            <h2>Welcome Back!</h2>
+            <div class="profile-info">
+                <img id="profilePicture" src="../images/default-profile.png" alt="Profile Picture" class="profile-picture">
+                <div class="user-details">
+                    <p id="userName">Loading...</p>
+                    <p id="userEmail">Loading...</p>
+                </div>
+            </div>
+            <button id="logoutButton" class="logout-btn">Logout</button>
+        </div>
+        
+        <div id="loginBox" class="login-box">
             <h2>Buyer Login</h2>
-            <form id="buyerLoginForm">
+            <form id="buyerLoginForm" aria-label="Buyer login form">
                 <div class="form-group">
-                    <input type="email" id="email" placeholder="Email" required>
+                    <label for="email" class="visually-hidden">Email</label>
+                    <input type="email" id="email" placeholder="Email" required aria-required="true">
                 </div>
                 <div class="form-group">
-                    <input type="password" id="password" placeholder="Password" required>
+                    <label for="password" class="visually-hidden">Password</label>
+                    <input type="password" id="password" placeholder="Password" required aria-required="true">
                 </div>
                 <button type="submit">Login</button>
-                <p class="register-link">
-                    Don't have an account? <a href="./register.html">Register here</a>
-                </p>
+                <p class="register-link">Don't have an account? <a href="register.html">Register here</a></p>
             </form>
         </div>
     </div>
 
-    <!-- Firebase Scripts - Update order of scripts -->
+    <!-- Firebase Scripts -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
     <script src="../javascripts/firebase-config.js"></script>
+    <script>
+        function debugLog(message) {
+            console.log(message);
+            const debugLog = document.getElementById('debug-log');
+            if (debugLog) {
+                const time = new Date().toLocaleTimeString();
+                debugLog.innerHTML += `<div>[${time}] ${message}</div>`;
+                debugLog.scrollTop = debugLog.scrollHeight;
+            }
+        }
+        debugLog('Login page loaded');
+        
+        // Check if user is already logged in as a buyer
+        firebase.auth().onAuthStateChanged(async (user) => {
+            if (user) {
+                debugLog('User detected, checking role...');
+                try {
+                    const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
+                    const userData = userDoc.data();
+                    if (userData && userData.role === 'buyer') {
+                        debugLog('Valid buyer detected, showing profile card...');
+                        document.getElementById('loginBox').style.display = 'none';
+                        document.getElementById('profileCard').style.display = 'block';
+                        document.getElementById('userName').textContent = userData.name || 'Buyer';
+                        document.getElementById('userEmail').textContent = user.email;
+                        if (userData.profilePicture) {
+                            document.getElementById('profilePicture').src = userData.profilePicture;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Auth check error:', error);
+                    debugLog('Auth check error: ' + error.message);
+                }
+            } else {
+                debugLog('No user logged in');
+                document.getElementById('loginBox').style.display = 'block';
+                document.getElementById('profileCard').style.display = 'none';
+            }
+        });
+    </script>
     <script src="./js/buyer-login.js"></script>
+
+    <!-- Debug Console -->
+    <div id="debug-console" style="display: block; position: fixed; bottom: 0; right: 0; background: rgba(0,0,0,0.8); color: white; padding: 10px; max-height: 200px; overflow-y: auto; z-index: 9999;">
+        <div id="debug-log"></div>
+    </div>
 </body>
 </html>
