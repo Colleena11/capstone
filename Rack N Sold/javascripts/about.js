@@ -5,8 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Team members data
     const teamMembers = [
         {
-            name: 'Mark Joshua Diog',
-            role: 'CEO & Founder',
+            name: 'Senor Roberto Francisco M. Pablo',
+            role: 'AI Engineer at Theosym corp',
             image: 'images/team/jm.jpg',
             description: 'Lead developer and visionary behind Rack N Sold.'
         },
@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
             description: 'Handles marketing strategy and business development.'
         },
         {
-            name: 'Jan Jaerod Marzo',
+            name: 'Khryzxalle Kyle D. Dizon',
             role: 'Art Director',
             image: 'images/team/clarenz.jpg',
             description: 'Oversees artistic direction and curation.'

@@ -3,46 +3,328 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Platform - Rack N Sold</title>
-    <link rel="stylesheet" href="../../Rack N Sold/css/admin.css">
-    
-    <!-- Firebase Scripts -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
-    <script src="js/firebase-config.js"></script>
-    <script src="js/auth.js"></script>
-    
-    <script>
-        // Immediate check for authentication
-        firebase.auth().onAuthStateChanged((user) => {
-            if (!user || user.email !== 'admin@gmail.com') {
-                console.log('No admin user, redirecting to login');
-                window.location.replace('login.html');
-            } else {
-                console.log('Admin authenticated:', user.email);
-            }
-        });
-    </script>
+    <title>Rack N Sold Admin</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        .artwork-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 15px;
+            transition: transform 0.2s;
+            position: relative;
+        }
+        .artwork-card.pending {
+            border: 2px solid #f1c40f;
+        }
+        .artwork-card.approved {
+            border: 2px solid #27ae60;
+        }
+        .artwork-card.rejected {
+            border: 2px solid #e74c3c;
+            opacity: 0.7;
+        }
+        .artwork-card:hover {
+            transform: translateY(-5px);
+        }
+        .artwork-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+        .artwork-info {
+            margin-top: 10px;
+        }
+        .artwork-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+        .artwork-artist {
+            color: #666;
+            margin: 5px 0;
+        }
+        .artwork-price {
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 5px 0;
+        }
+        .artwork-description {
+            color: #666;
+            margin: 10px 0;
+            font-size: 0.9em;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .approve-btn {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .reject-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .approve-btn:hover {
+            background-color: #219a52;
+        }
+        .reject-btn:hover {
+            background-color: #c0392b;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .status-approved {
+            background-color: #27ae60;
+            color: white;
+        }
+        .status-rejected {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .status-pending {
+            background-color: #f1c40f;
+            color: white;
+        }
+        #notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            color: white;
+            display: none;
+            z-index: 1000;
+        }
+        .notification-success {
+            background-color: #27ae60;
+        }
+        .notification-error {
+            background-color: #e74c3c;
+        }
+        .error-message {
+            text-align: center;
+            padding: 40px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 20px;
+        }
+        .error-message h2 {
+            color: #e74c3c;
+            margin-bottom: 10px;
+        }
+        .error-message p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .retry-button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .retry-button:hover {
+            background-color: #2980b9;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+    </style>
 </head>
 <body>
-    <div class="admin-header">
-        <h1>Admin Dashboard</h1>
-        <nav>
-            <a href="../../Rack N Sold/racknsold.html">Back to Site</a>
-        </nav>
+    <div class="header">
+        <h1>Rack N Sold Admin</h1>
+        <button onclick="loadGallery()" class="retry-button">
+            Refresh Gallery
+        </button>
+    </div>
+    
+    <div id="gallery" class="gallery">
+        <div class="loading">Loading artworks...</div>
     </div>
 
-    <div class="pending-artworks">
-        <h2>Pending Artworks for Review</h2>
-        <div id="pending-container" class="artworks-grid"></div>
-    </div>
+    <div id="notification"></div>
 
-    <div class="approved-artworks">
-        <h2>Approved Artworks</h2>
-        <div id="approved-container" class="artworks-grid"></div>
-    </div>
+    <script>
+        const API_BASE_URL = 'http://localhost:5000';
+        let isUpdating = false;
 
-    <script type="module" src="admin.js"></script>
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification-${type}`;
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        async function updateArtworkStatus(artworkId, status) {
+            if (isUpdating) return;
+            
+            try {
+                isUpdating = true;
+                const button = event.target;
+                const originalText = button.textContent;
+                button.textContent = 'Processing...';
+                button.disabled = true;
+
+                const response = await fetch(`${API_BASE_URL}/api/artwork/${artworkId}/status`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to update artwork status');
+                }
+
+                showNotification(`Artwork ${status} successfully`, 'success');
+                
+                // Only update the specific artwork card
+                const artworkCard = button.closest('.artwork-card');
+                if (artworkCard) {
+                    artworkCard.className = `artwork-card ${status}`;
+                    const statusBadge = artworkCard.querySelector('.status-badge');
+                    if (statusBadge) {
+                        statusBadge.className = `status-badge status-${status}`;
+                        statusBadge.textContent = status;
+                    }
+                    const buttonGroup = artworkCard.querySelector('.button-group');
+                    if (buttonGroup) {
+                        buttonGroup.innerHTML = ''; // Remove buttons after status update
+                    }
+                }
+            } catch (error) {
+                showNotification(`Failed to ${status} artwork`, 'error');
+                const button = event.target;
+                button.textContent = originalText;
+                button.disabled = false;
+            } finally {
+                isUpdating = false;
+            }
+        }
+
+        function createArtworkCard(artwork) {
+            return `
+                <div class="artwork-card ${artwork.status}">
+                    <img src="${API_BASE_URL}${artwork.image}" alt="${artwork.title}" class="artwork-image" onerror="this.src='../images/sample.png'">
+                    <div class="artwork-info">
+                        <div class="artwork-title">
+                            ${artwork.title}
+                            <span class="status-badge status-${artwork.status}">${artwork.status}</span>
+                        </div>
+                        <div class="artwork-artist">By ${artwork.artist}</div>
+                        <div class="artwork-price">$${artwork.price.toFixed(2)}</div>
+                        <div class="artwork-description">${artwork.description}</div>
+                        <div class="button-group">
+                            ${artwork.status === 'pending' ? `
+                                <button 
+                                    onclick="updateArtworkStatus(${artwork.id}, 'approved')" 
+                                    class="approve-btn">
+                                    Approve
+                                </button>
+                                <button 
+                                    onclick="updateArtworkStatus(${artwork.id}, 'rejected')" 
+                                    class="reject-btn">
+                                    Reject
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showError(message) {
+            const gallery = document.getElementById('gallery');
+            gallery.innerHTML = `
+                <div class="error-message">
+                    <h2>Error</h2>
+                    <p>${message}</p>
+                    <button onclick="loadGallery()" class="retry-button">
+                        Try Again
+                    </button>
+                </div>
+            `;
+        }
+
+        async function loadGallery() {
+            try {
+                const gallery = document.getElementById('gallery');
+                gallery.innerHTML = '<div class="loading">Loading artworks...</div>';
+
+                const response = await fetch(`${API_BASE_URL}/api/artworks`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch artworks');
+                }
+                
+                const artworks = await response.json();
+                
+                if (artworks.length === 0) {
+                    gallery.innerHTML = `
+                        <div class="error-message">
+                            <h2>No Artworks Found</h2>
+                            <p>Upload some artworks to get started!</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                gallery.innerHTML = artworks.map(createArtworkCard).join('');
+            } catch (error) {
+                showError('Could not load artworks. Please try again later.');
+                console.error('Error loading gallery:', error);
+            }
+        }
+
+        // Initial load
+        loadGallery();
+    </script>
 </body>
 </html>

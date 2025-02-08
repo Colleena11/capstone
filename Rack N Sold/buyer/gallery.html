@@ -5,7 +5,141 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Art Gallery - Rack N Sold</title>
     <link rel="stylesheet" href="../css/styles.css">
-    <link rel="stylesheet" href="./css/gallery.css">
+    <style>
+        .gallery-container {
+            padding: 40px 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .gallery-container h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #2c3e50;
+        }
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+            padding: 20px;
+        }
+        .artwork-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+        .artwork-card:hover {
+            transform: translateY(-10px);
+        }
+        .artwork-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+        .artwork-info {
+            padding: 20px;
+        }
+        .artwork-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+        }
+        .artwork-artist {
+            color: #7f8c8d;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+        .artwork-price {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #27ae60;
+            margin-bottom: 15px;
+        }
+        .artwork-description {
+            color: #666;
+            font-size: 0.95em;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+        .add-to-cart-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #2980b9;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .add-to-cart-btn:hover {
+            background-color: #3498db;
+        }
+        .add-to-cart-btn:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 1.2em;
+        }
+        .error-message {
+            text-align: center;
+            padding: 40px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 20px auto;
+            max-width: 600px;
+        }
+        .error-message h2 {
+            color: #e74c3c;
+            margin-bottom: 10px;
+        }
+        .error-message p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-20px);
+            animation: slideIn 0.3s forwards;
+        }
+        .notification.success {
+            background-color: #27ae60;
+        }
+        .notification.error {
+            background-color: #e74c3c;
+        }
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .cart-link {
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            color: inherit;
+        }
+        .cart-link img {
+            margin-left: 10px;
+        }
+    </style>
 </head>
 <body>
     <div class="header">
@@ -24,8 +158,8 @@
                         <li><a href="contact.html">Contact</a></li>
                     </ul>
                 </nav>
-                <a href="../cart.html">
-                    <img src="../images/cart.png" width="30px" height="30px">
+                <a href="cart.html" class="cart-link" id="cart-link">
+                    <img src="../images/cart.png" width="30px" height="30px" alt="Cart">
                 </a>
             </div>
         </div>
@@ -33,19 +167,101 @@
 
     <div class="gallery-container">
         <h2>Art Gallery</h2>
-        <div id="artworks-grid" class="artworks-grid">
-            <!-- Artworks will be loaded here -->
+        <div id="gallery" class="gallery">
             <div class="loading">Loading artworks...</div>
         </div>
     </div>
 
-    <!-- Firebase Scripts -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
-    <script src="../javascripts/firebase-config.js"></script>
-    <script src="../javascripts/auth-state.js"></script>
-    <script src="./js/gallery.js"></script>
+    <script>
+        const API_BASE_URL = 'http://localhost:5000';
+
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        async function loadGallery() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/artworks/approved`);
+                const artworks = await response.json();
+                const galleryContainer = document.getElementById('gallery');
+                galleryContainer.innerHTML = '';
+
+                artworks.forEach(artwork => {
+                    const artworkCard = document.createElement('div');
+                    artworkCard.className = 'artwork-card';
+                    artworkCard.innerHTML = `
+                        <img src="${API_BASE_URL}${artwork.image}" alt="${artwork.title}" class="artwork-image" onerror="this.src='../images/sample.png'">
+                        <div class="artwork-info">
+                            <div class="artwork-title">${artwork.title}</div>
+                            <div class="artwork-artist">By ${artwork.artist}</div>
+                            <div class="artwork-price">$${artwork.price.toFixed(2)}</div>
+                            <div class="artwork-description">${artwork.description}</div>
+                            <button class="add-to-cart-btn" data-artwork-id="${artwork.id}">Add to Cart</button>
+                        </div>
+                    `;
+                    galleryContainer.appendChild(artworkCard);
+                });
+
+                // Add event listeners to all "Add to Cart" buttons
+                document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+                    button.addEventListener('click', async (e) => {
+                        e.preventDefault();
+                        const artworkId = button.dataset.artworkId;
+                        button.disabled = true;
+                        button.textContent = 'Adding...';
+
+                        try {
+                            const response = await fetch(`${API_BASE_URL}/api/cart/add`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({ artwork_id: artworkId })
+                            });
+
+                            if (!response.ok) {
+                                throw new Error('Failed to add to cart');
+                            }
+
+                            showNotification('Added to cart successfully!', 'success');
+                            button.textContent = 'Add to Cart';
+                            button.disabled = false;
+                        } catch (error) {
+                            console.error('Error adding to cart:', error);
+                            showNotification('Failed to add to cart. Please try again.', 'error');
+                            button.textContent = 'Add to Cart';
+                            button.disabled = false;
+                        }
+                    });
+                });
+            } catch (error) {
+                console.error('Error loading gallery:', error);
+                const galleryContainer = document.getElementById('gallery');
+                galleryContainer.innerHTML = `
+                    <div class="error-message">
+                        <h2>Error</h2>
+                        <p>Could not load artworks. Please try again later.</p>
+                        <button onclick="loadGallery()" class="retry-button">Try Again</button>
+                    </div>
+                `;
+            }
+        }
+
+        // Handle cart link click
+        document.getElementById('cart-link').addEventListener('click', (e) => {
+            e.preventDefault();
+            window.location.href = 'cart.html';
+        });
+
+        // Initial load
+        loadGallery();
+    </script>
 </body>
 </html>
