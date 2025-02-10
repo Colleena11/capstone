@@ -135,4 +135,110 @@ document.addEventListener('DOMContentLoaded', function() {
             submitBtn.textContent = originalText;
         }
     });
+
+    // Modal Functionality
+    const modal = document.getElementById('uploadGuideModal');
+    const closeModal = document.querySelector('.close');
+    const howToUploadBtn = document.querySelector('.how-to-btn');
+
+    closeModal.onclick = () => {
+        modal.style.display = 'none';
+    };
+
+    howToUploadBtn.onclick = () => {
+        modal.style.display = 'block';
+    };
+
+    window.onclick = (event) => {
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    };
+
+    // Image Preview Enhancement
+    const inputFile = document.getElementById('input-file');
+    const photoPic = document.getElementById('photo-pic');
+
+    inputFile.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                photoPic.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Form Validation
+    const artworkForm = document.getElementById('artworkForm');
+    const titleInput = document.getElementById('artTitle');
+    const artistInput = document.getElementById('artistName');
+    const priceInput = document.getElementById('price');
+    const descriptionInput = document.getElementById('description');
+
+    function validateForm() {
+        let isValid = true;
+
+        if (titleInput.value.trim() === '') {
+            isValid = false;
+            titleInput.style.borderColor = 'red';
+        } else {
+            titleInput.style.borderColor = '#ddd';
+        }
+
+        if (artistInput.value.trim() === '') {
+            isValid = false;
+            artistInput.style.borderColor = 'red';
+        } else {
+            artistInput.style.borderColor = '#ddd';
+        }
+
+        if (priceInput.value <= 0) {
+            isValid = false;
+            priceInput.style.borderColor = 'red';
+        } else {
+            priceInput.style.borderColor = '#ddd';
+        }
+
+        if (descriptionInput.value.trim() === '') {
+            isValid = false;
+            descriptionInput.style.borderColor = 'red';
+        } else {
+            descriptionInput.style.borderColor = '#ddd';
+        }
+
+        if (!inputFile.files.length) {
+            isValid = false;
+            inputFile.parentElement.style.borderColor = 'red';
+        } else {
+            inputFile.parentElement.style.borderColor = 'transparent';
+        }
+
+        return isValid;
+    }
+
+    artworkForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (validateForm()) {
+            // Proceed with form submission logic
+            alert('Artwork submitted successfully!');
+            // You can add your actual submission logic here
+        }
+    });
+
+    // Ensure modal is clickable
+    const modalContent = modal.querySelector('.modal-content');
+
+    // Prevent modal background from closing when clicking inside
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+
+    // Prevent clicks inside modal from propagating
+    modalContent.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
 });

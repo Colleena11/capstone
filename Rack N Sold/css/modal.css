@@ -1,0 +1,200 @@
+/* The Modal (background) */
+#uploadGuideModal {
+    display: none;
+    position: fixed;
+    z-index: 99999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+#uploadGuideModal.visible {
+    opacity: 1;
+}
+
+/* Modal Content */
+#uploadGuideModal .modal-content {
+    background-color: #ffffff;
+    margin: 5vh auto;
+    padding: 2rem;
+    width: 90%;
+    max-width: 800px;
+    border-radius: 15px;
+    position: relative;
+    box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.3s ease-out;
+    transform: translateY(-30px);
+    opacity: 0;
+    transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+}
+
+#uploadGuideModal.visible .modal-content {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+@keyframes modalSlideIn {
+    from {
+        transform: translateY(-30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Close Button */
+#uploadGuideModal .close {
+    position: absolute;
+    right: 1.5rem;
+    top: 1.5rem;
+    color: #D4AF37;
+    font-size: 2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: transparent;
+}
+
+#uploadGuideModal .close:hover {
+    transform: rotate(90deg);
+    background: rgba(212, 175, 55, 0.1);
+}
+
+/* Modal Header */
+#uploadGuideModal .modal-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid rgba(212, 175, 55, 0.1);
+    position: relative;
+}
+
+#uploadGuideModal .modal-header h2 {
+    color: #D4AF37;
+    margin: 0;
+    font-size: 1.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Guide Steps */
+#uploadGuideModal .guide-steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin: 1rem 0;
+}
+
+#uploadGuideModal .step {
+    background: rgba(212, 175, 55, 0.05);
+    padding: 2rem;
+    border-radius: 12px;
+    text-align: center;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(212, 175, 55, 0.1);
+}
+
+#uploadGuideModal .step:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(212, 175, 55, 0.1);
+}
+
+#uploadGuideModal .step i {
+    font-size: 2.5rem;
+    color: #D4AF37;
+    margin-bottom: 1rem;
+}
+
+#uploadGuideModal .step h3 {
+    color: #333;
+    margin: 1rem 0;
+}
+
+#uploadGuideModal .step p {
+    color: #666;
+    line-height: 1.5;
+    margin: 0;
+}
+
+#uploadGuideModal .step-details {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0 0;
+    text-align: left;
+}
+
+#uploadGuideModal .step-details li {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+    color: #666;
+}
+
+#uploadGuideModal .step-details li::before {
+    content: '•';
+    color: #D4AF37;
+    position: absolute;
+    left: 0;
+}
+
+/* How to Upload Button */
+#howToUpload {
+    display: block;
+    margin: 1rem auto 2rem;
+    padding: 0.8rem 1.5rem;
+    background: linear-gradient(45deg, #D4AF37, #B4943E);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(212, 175, 55, 0.2);
+}
+
+#howToUpload:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+    background: linear-gradient(45deg, #B4943E, #D4AF37);
+}
+
+#howToUpload i {
+    margin-right: 8px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    #uploadGuideModal .modal-content {
+        margin: 10vh auto;
+        width: 95%;
+        padding: 1.5rem;
+    }
+    
+    #uploadGuideModal .guide-steps {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    #uploadGuideModal .step {
+        padding: 1.5rem;
+    }
+    
+    #uploadGuideModal .modal-header h2 {
+        font-size: 1.5rem;
+    }
+}

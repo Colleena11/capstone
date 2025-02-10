@@ -5,66 +5,97 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Art Gallery - Rack N Sold</title>
     <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         .gallery-container {
             padding: 40px 20px;
             max-width: 1400px;
             margin: 0 auto;
         }
+        
         .gallery-container h2 {
             text-align: center;
             margin-bottom: 30px;
             color: #2c3e50;
         }
+        
         .gallery {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 30px;
             padding: 20px;
         }
+        
         .artwork-card {
             background: white;
             border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             overflow: hidden;
-            transition: transform 0.3s ease;
+            transition: all 0.3s ease;
         }
+        
         .artwork-card:hover {
             transform: translateY(-10px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
         }
+        
         .artwork-image {
             width: 100%;
             height: 250px;
             object-fit: cover;
+            transition: transform 0.3s ease;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            pointer-events: none;
         }
+        
+        .artwork-card:hover .artwork-image {
+            transform: scale(1.05);
+        }
+        
         .artwork-info {
             padding: 20px;
         }
+        
         .artwork-title {
             font-size: 1.4em;
             font-weight: bold;
             margin: 0 0 10px 0;
             color: #2c3e50;
         }
+        
         .artwork-artist {
             color: #7f8c8d;
             font-size: 1.1em;
             margin-bottom: 10px;
         }
+        
         .artwork-price {
             font-size: 1.3em;
             font-weight: bold;
             color: #27ae60;
             margin-bottom: 15px;
         }
+        
         .artwork-description {
             color: #666;
             font-size: 0.95em;
             line-height: 1.5;
             margin-bottom: 20px;
+            max-height: 4.5em;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
         }
+        
         .add-to-cart-btn {
-            display: block;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             width: 100%;
             padding: 12px;
             background-color: #2980b9;
@@ -73,38 +104,21 @@
             border-radius: 6px;
             font-size: 1.1em;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: all 0.2s ease;
+            gap: 8px;
         }
+        
         .add-to-cart-btn:hover {
             background-color: #3498db;
+            transform: translateY(-2px);
         }
+        
         .add-to-cart-btn:disabled {
             background-color: #bdc3c7;
             cursor: not-allowed;
+            transform: none;
         }
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-            font-size: 1.2em;
-        }
-        .error-message {
-            text-align: center;
-            padding: 40px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin: 20px auto;
-            max-width: 600px;
-        }
-        .error-message h2 {
-            color: #e74c3c;
-            margin-bottom: 10px;
-        }
-        .error-message p {
-            color: #666;
-            margin-bottom: 20px;
-        }
+        
         .notification {
             position: fixed;
             top: 20px;
@@ -114,30 +128,202 @@
             color: white;
             font-weight: bold;
             z-index: 1000;
-            opacity: 0;
-            transform: translateY(-20px);
-            animation: slideIn 0.3s forwards;
+            animation: slideIn 0.3s ease-out;
         }
+        
         .notification.success {
             background-color: #27ae60;
         }
+        
         .notification.error {
             background-color: #e74c3c;
         }
+        
         @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
             to {
+                transform: translateX(0);
                 opacity: 1;
-                transform: translateY(0);
             }
         }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 1.2em;
+        }
+        
+        .error-message {
+            text-align: center;
+            padding: 40px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 20px auto;
+            max-width: 600px;
+        }
+        
+        .error-message h2 {
+            color: #e74c3c;
+            margin-bottom: 10px;
+        }
+        
         .cart-link {
             text-decoration: none;
             display: flex;
             align-items: center;
             color: inherit;
         }
+        
         .cart-link img {
             margin-left: 10px;
+        }
+        
+        /* Screenshot Protection Styles */
+        .screenshot-blocker {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            z-index: 9999;
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .screenshot-blocker.visible {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .screenshot-warning {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            color: white;
+            max-width: 500px;
+            margin: 20px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            animation: slideUp 0.4s ease;
+        }
+
+        .screenshot-warning i {
+            font-size: 4em;
+            color: #e74c3c;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
+            animation: pulse 2s infinite;
+        }
+
+        .screenshot-warning h2 {
+            font-size: 2em;
+            margin: 20px 0;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .screenshot-warning p {
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin: 15px 0;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .warning-buttons {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .close-warning {
+            background: linear-gradient(145deg, #e74c3c, #c0392b);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .close-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+            background: linear-gradient(145deg, #c0392b, #e74c3c);
+        }
+
+        .close-warning:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 10px rgba(231, 76, 60, 0.3);
+        }
+
+        .close-warning i {
+            font-size: 1.1em;
+            margin-right: 8px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .screenshot-warning {
+                padding: 30px 20px;
+                margin: 15px;
+            }
+
+            .screenshot-warning h2 {
+                font-size: 1.8em;
+            }
+
+            .screenshot-warning p {
+                font-size: 1em;
+            }
+
+            .close-warning {
+                padding: 12px 30px;
+                font-size: 1em;
+            }
         }
     </style>
 </head>
@@ -172,96 +358,209 @@
         </div>
     </div>
 
-    <script>
-        const API_BASE_URL = 'http://localhost:5000';
+    <!-- Screenshot Blocker -->
+    <div id="screenshotBlocker" class="screenshot-blocker">
+        <div class="screenshot-warning">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h2>Screenshot Detected!</h2>
+            <p>Taking screenshots of artworks is not allowed to protect the artists' intellectual property rights.</p>
+            <p>Please respect our artists and purchase the artwork if you'd like to own it.</p>
+            <div class="warning-buttons">
+                <button onclick="closeScreenshotWarning()" class="close-warning">
+                    <i class="fas fa-check"></i> I Understand
+                </button>
+            </div>
+        </div>
+    </div>
 
+    <script>
         function showNotification(message, type) {
             const notification = document.createElement('div');
             notification.className = `notification ${type}`;
             notification.textContent = message;
             document.body.appendChild(notification);
-            
             setTimeout(() => {
                 notification.remove();
             }, 3000);
         }
 
-        async function loadGallery() {
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/artworks/approved`);
-                const artworks = await response.json();
-                const galleryContainer = document.getElementById('gallery');
-                galleryContainer.innerHTML = '';
+        function createArtworkCard(artwork) {
+            const card = document.createElement('div');
+            card.className = 'artwork-card';
+            card.setAttribute('data-artwork-id', artwork.id);
+            
+            card.innerHTML = `
+                <img src="${artwork.image}" alt="${artwork.title}" class="artwork-image">
+                <div class="artwork-info">
+                    <h3 class="artwork-title">${artwork.title}</h3>
+                    <p class="artwork-artist">By ${artwork.artist}</p>
+                    <p class="artwork-price">₱${artwork.price.toLocaleString()}</p>
+                    <p class="artwork-description">${artwork.description}</p>
+                    <button class="add-to-cart-btn" onclick="addToCart('${artwork.id}')">
+                        <i class="fas fa-shopping-cart"></i> Add to Cart
+                    </button>
+                </div>
+            `;
+            
+            return card;
+        }
 
-                artworks.forEach(artwork => {
-                    const artworkCard = document.createElement('div');
-                    artworkCard.className = 'artwork-card';
-                    artworkCard.innerHTML = `
-                        <img src="${API_BASE_URL}${artwork.image}" alt="${artwork.title}" class="artwork-image" onerror="this.src='../images/sample.png'">
-                        <div class="artwork-info">
-                            <div class="artwork-title">${artwork.title}</div>
-                            <div class="artwork-artist">By ${artwork.artist}</div>
-                            <div class="artwork-price">$${artwork.price.toFixed(2)}</div>
-                            <div class="artwork-description">${artwork.description}</div>
-                            <button class="add-to-cart-btn" data-artwork-id="${artwork.id}">Add to Cart</button>
+        function addToCart(artworkId) {
+            try {
+                // Get artwork details
+                const artworks = JSON.parse(localStorage.getItem('artworks') || '[]');
+                const artwork = artworks.find(art => art.id === artworkId);
+                
+                if (!artwork) {
+                    throw new Error('Artwork not found');
+                }
+                
+                // Get current cart
+                let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+                
+                // Check if already in cart
+                if (cart.some(item => item.id === artworkId)) {
+                    showNotification('This artwork is already in your cart', 'error');
+                    return;
+                }
+                
+                // Add to cart
+                cart.push({
+                    id: artwork.id,
+                    title: artwork.title,
+                    price: artwork.price,
+                    image: artwork.image,
+                    artist: artwork.artist
+                });
+                
+                // Save cart
+                localStorage.setItem('cart', JSON.stringify(cart));
+                showNotification('Added to cart successfully!', 'success');
+                
+                // Update cart count if exists
+                const cartCount = document.querySelector('.cart-count');
+                if (cartCount) {
+                    cartCount.textContent = cart.length;
+                }
+                
+            } catch (error) {
+                console.error('Error adding to cart:', error);
+                showNotification('Failed to add to cart', 'error');
+            }
+        }
+
+        function loadGallery() {
+            const gallery = document.querySelector('.gallery');
+            gallery.innerHTML = '<div class="loading">Loading artworks...</div>';
+            
+            try {
+                // Get artworks from localStorage
+                const artworks = JSON.parse(localStorage.getItem('artworks') || '[]');
+                
+                // Filter only approved artworks
+                const approvedArtworks = artworks.filter(art => art.status === 'approved');
+                
+                if (approvedArtworks.length === 0) {
+                    gallery.innerHTML = `
+                        <div class="error-message">
+                            <h2>No Artworks Available</h2>
+                            <p>Check back later for new artworks!</p>
                         </div>
                     `;
-                    galleryContainer.appendChild(artworkCard);
+                    return;
+                }
+                
+                // Clear loading message
+                gallery.innerHTML = '';
+                
+                // Sort by newest first
+                approvedArtworks.sort((a, b) => new Date(b.uploadDate) - new Date(a.uploadDate));
+                
+                // Create and append artwork cards
+                approvedArtworks.forEach(artwork => {
+                    gallery.appendChild(createArtworkCard(artwork));
                 });
-
-                // Add event listeners to all "Add to Cart" buttons
-                document.querySelectorAll('.add-to-cart-btn').forEach(button => {
-                    button.addEventListener('click', async (e) => {
-                        e.preventDefault();
-                        const artworkId = button.dataset.artworkId;
-                        button.disabled = true;
-                        button.textContent = 'Adding...';
-
-                        try {
-                            const response = await fetch(`${API_BASE_URL}/api/cart/add`, {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                },
-                                body: JSON.stringify({ artwork_id: artworkId })
-                            });
-
-                            if (!response.ok) {
-                                throw new Error('Failed to add to cart');
-                            }
-
-                            showNotification('Added to cart successfully!', 'success');
-                            button.textContent = 'Add to Cart';
-                            button.disabled = false;
-                        } catch (error) {
-                            console.error('Error adding to cart:', error);
-                            showNotification('Failed to add to cart. Please try again.', 'error');
-                            button.textContent = 'Add to Cart';
-                            button.disabled = false;
-                        }
-                    });
-                });
+                
             } catch (error) {
                 console.error('Error loading gallery:', error);
-                const galleryContainer = document.getElementById('gallery');
-                galleryContainer.innerHTML = `
+                gallery.innerHTML = `
                     <div class="error-message">
-                        <h2>Error</h2>
-                        <p>Could not load artworks. Please try again later.</p>
-                        <button onclick="loadGallery()" class="retry-button">Try Again</button>
+                        <h2>Error Loading Gallery</h2>
+                        <p>Please try again later.</p>
                     </div>
                 `;
             }
         }
 
-        // Handle cart link click
-        document.getElementById('cart-link').addEventListener('click', (e) => {
-            e.preventDefault();
-            window.location.href = 'cart.html';
+        // Listen for artwork status updates from admin panel
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'artworks') {
+                loadGallery(); // Reload gallery when artworks are updated
+            }
         });
 
         // Initial load
         loadGallery();
+
+        // Screenshot Protection
+        function showScreenshotWarning() {
+            const blocker = document.getElementById('screenshotBlocker');
+            blocker.classList.add('visible');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeScreenshotWarning() {
+            const blocker = document.getElementById('screenshotBlocker');
+            blocker.classList.remove('visible');
+            document.body.style.overflow = '';
+        }
+
+        // Detect screenshot attempts
+        document.addEventListener('keyup', function(e) {
+            // Windows: PrintScreen
+            if (e.key === 'PrintScreen') {
+                showScreenshotWarning();
+            }
+            
+            // Windows: Ctrl + Shift + S or Windows + Shift + S
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'S') {
+                showScreenshotWarning();
+            }
+            
+            // macOS: Cmd + Shift + 3 or Cmd + Shift + 4
+            if (e.metaKey && e.shiftKey && (e.key === '3' || e.key === '4')) {
+                showScreenshotWarning();
+            }
+        });
+
+        // Detect right-click and context menu
+        document.addEventListener('contextmenu', function(e) {
+            if (e.target.classList.contains('artwork-image')) {
+                e.preventDefault();
+                showScreenshotWarning();
+            }
+        });
+
+        // Detect copy attempts
+        document.addEventListener('copy', function(e) {
+            if (e.target.classList.contains('artwork-image')) {
+                e.preventDefault();
+                showScreenshotWarning();
+            }
+        });
+
+        // Additional protection for artwork images
+        document.querySelectorAll('.artwork-image').forEach(img => {
+            img.addEventListener('dragstart', e => e.preventDefault());
+            img.style.webkitTouchCallout = 'none';
+        });
+
+        // Listen for DevTools screenshot command
+        window.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'P') {
+                showScreenshotWarning();
+            }
+        });
     </script>
 </body>
 </html>

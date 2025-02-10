@@ -189,9 +189,6 @@
     <div id="notification"></div>
 
     <script>
-        const API_BASE_URL = 'http://localhost:5000';
-        let isUpdating = false;
-
         function showNotification(message, type) {
             const notification = document.getElementById('notification');
             notification.textContent = message;
@@ -202,83 +199,63 @@
             }, 3000);
         }
 
-        async function updateArtworkStatus(artworkId, status) {
-            if (isUpdating) return;
-            
+        function updateArtworkStatus(artworkId, status) {
             try {
-                isUpdating = true;
-                const button = event.target;
-                const originalText = button.textContent;
-                button.textContent = 'Processing...';
-                button.disabled = true;
-
-                const response = await fetch(`${API_BASE_URL}/api/artwork/${artworkId}/status`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ status })
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to update artwork status');
-                }
-
-                showNotification(`Artwork ${status} successfully`, 'success');
+                // Get current artworks
+                let artworks = JSON.parse(localStorage.getItem('artworks') || '[]');
                 
-                // Only update the specific artwork card
-                const artworkCard = button.closest('.artwork-card');
-                if (artworkCard) {
-                    artworkCard.className = `artwork-card ${status}`;
-                    const statusBadge = artworkCard.querySelector('.status-badge');
-                    if (statusBadge) {
-                        statusBadge.className = `status-badge status-${status}`;
-                        statusBadge.textContent = status;
-                    }
-                    const buttonGroup = artworkCard.querySelector('.button-group');
-                    if (buttonGroup) {
-                        buttonGroup.innerHTML = ''; // Remove buttons after status update
+                // Find and update artwork status
+                const artwork = artworks.find(art => art.id === artworkId);
+                if (artwork) {
+                    artwork.status = status;
+                    artwork.reviewDate = new Date().toISOString();
+                    
+                    // Save updated artworks
+                    localStorage.setItem('artworks', JSON.stringify(artworks));
+                    
+                    // Update UI
+                    const card = document.querySelector(`[data-artwork-id="${artworkId}"]`);
+                    if (card) {
+                        card.className = `artwork-card ${status}`;
+                        showNotification(`Artwork ${status === 'approved' ? 'approved' : 'rejected'} successfully`, 'success');
                     }
                 }
             } catch (error) {
-                showNotification(`Failed to ${status} artwork`, 'error');
-                const button = event.target;
-                button.textContent = originalText;
-                button.disabled = false;
-            } finally {
-                isUpdating = false;
+                showError('Error updating artwork status');
+                console.error('Error:', error);
             }
         }
 
         function createArtworkCard(artwork) {
-            return `
-                <div class="artwork-card ${artwork.status}">
-                    <img src="${API_BASE_URL}${artwork.image}" alt="${artwork.title}" class="artwork-image" onerror="this.src='../images/sample.png'">
-                    <div class="artwork-info">
-                        <div class="artwork-title">
-                            ${artwork.title}
-                            <span class="status-badge status-${artwork.status}">${artwork.status}</span>
-                        </div>
-                        <div class="artwork-artist">By ${artwork.artist}</div>
-                        <div class="artwork-price">$${artwork.price.toFixed(2)}</div>
-                        <div class="artwork-description">${artwork.description}</div>
+            const card = document.createElement('div');
+            card.className = `artwork-card ${artwork.status}`;
+            card.setAttribute('data-artwork-id', artwork.id);
+            
+            card.innerHTML = `
+                <img src="${artwork.image}" alt="${artwork.title}" class="artwork-image">
+                <div class="artwork-info">
+                    <h3 class="artwork-title">${artwork.title}</h3>
+                    <p class="artwork-artist">By ${artwork.artist}</p>
+                    <p class="artwork-price">₱${artwork.price.toLocaleString()}</p>
+                    <p class="artwork-description">${artwork.description}</p>
+                    <p class="upload-date">Uploaded: ${new Date(artwork.uploadDate).toLocaleDateString()}</p>
+                    ${artwork.reviewDate ? 
+                        `<p class="review-date">Reviewed: ${new Date(artwork.reviewDate).toLocaleDateString()}</p>` 
+                        : ''}
+                    ${artwork.status === 'pending' ? `
                         <div class="button-group">
-                            ${artwork.status === 'pending' ? `
-                                <button 
-                                    onclick="updateArtworkStatus(${artwork.id}, 'approved')" 
-                                    class="approve-btn">
-                                    Approve
-                                </button>
-                                <button 
-                                    onclick="updateArtworkStatus(${artwork.id}, 'rejected')" 
-                                    class="reject-btn">
-                                    Reject
-                                </button>
-                            ` : ''}
+                            <button onclick="updateArtworkStatus('${artwork.id}', 'approved')" class="approve-btn">
+                                <i class="fas fa-check"></i> Approve
+                            </button>
+                            <button onclick="updateArtworkStatus('${artwork.id}', 'rejected')" class="reject-btn">
+                                <i class="fas fa-times"></i> Reject
+                            </button>
                         </div>
-                    </div>
+                    ` : ''}
                 </div>
             `;
+            
+            return card;
         }
 
         function showError(message) {
@@ -294,34 +271,42 @@
             `;
         }
 
-        async function loadGallery() {
+        function loadGallery() {
+            const gallery = document.querySelector('.gallery');
+            gallery.innerHTML = ''; // Clear existing content
+            
             try {
-                const gallery = document.getElementById('gallery');
-                gallery.innerHTML = '<div class="loading">Loading artworks...</div>';
-
-                const response = await fetch(`${API_BASE_URL}/api/artworks`);
-                if (!response.ok) {
-                    throw new Error('Failed to fetch artworks');
-                }
-                
-                const artworks = await response.json();
+                const artworks = JSON.parse(localStorage.getItem('artworks') || '[]');
                 
                 if (artworks.length === 0) {
-                    gallery.innerHTML = `
-                        <div class="error-message">
-                            <h2>No Artworks Found</h2>
-                            <p>Upload some artworks to get started!</p>
-                        </div>
-                    `;
+                    gallery.innerHTML = '<p class="no-artworks">No artworks uploaded yet.</p>';
                     return;
                 }
                 
-                gallery.innerHTML = artworks.map(createArtworkCard).join('');
+                // Sort artworks: pending first, then by upload date (newest first)
+                artworks.sort((a, b) => {
+                    if (a.status === 'pending' && b.status !== 'pending') return -1;
+                    if (a.status !== 'pending' && b.status === 'pending') return 1;
+                    return new Date(b.uploadDate) - new Date(a.uploadDate);
+                });
+                
+                artworks.forEach(artwork => {
+                    gallery.appendChild(createArtworkCard(artwork));
+                });
+                
             } catch (error) {
-                showError('Could not load artworks. Please try again later.');
-                console.error('Error loading gallery:', error);
+                showError('Error loading gallery');
+                console.error('Error:', error);
             }
         }
+
+        // Listen for new artwork uploads
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'ARTWORK_UPLOADED') {
+                loadGallery();
+                showNotification('New artwork received!', 'success');
+            }
+        });
 
         // Initial load
         loadGallery();
