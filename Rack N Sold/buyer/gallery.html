@@ -6,326 +6,6 @@
     <title>Art Gallery - Rack N Sold</title>
     <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        .gallery-container {
-            padding: 40px 20px;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-        
-        .gallery-container h2 {
-            text-align: center;
-            margin-bottom: 30px;
-            color: #2c3e50;
-        }
-        
-        .gallery {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 30px;
-            padding: 20px;
-        }
-        
-        .artwork-card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-        
-        .artwork-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        }
-        
-        .artwork-image {
-            width: 100%;
-            height: 250px;
-            object-fit: cover;
-            transition: transform 0.3s ease;
-            user-select: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            pointer-events: none;
-        }
-        
-        .artwork-card:hover .artwork-image {
-            transform: scale(1.05);
-        }
-        
-        .artwork-info {
-            padding: 20px;
-        }
-        
-        .artwork-title {
-            font-size: 1.4em;
-            font-weight: bold;
-            margin: 0 0 10px 0;
-            color: #2c3e50;
-        }
-        
-        .artwork-artist {
-            color: #7f8c8d;
-            font-size: 1.1em;
-            margin-bottom: 10px;
-        }
-        
-        .artwork-price {
-            font-size: 1.3em;
-            font-weight: bold;
-            color: #27ae60;
-            margin-bottom: 15px;
-        }
-        
-        .artwork-description {
-            color: #666;
-            font-size: 0.95em;
-            line-height: 1.5;
-            margin-bottom: 20px;
-            max-height: 4.5em;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-        }
-        
-        .add-to-cart-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            padding: 12px;
-            background-color: #2980b9;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 1.1em;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            gap: 8px;
-        }
-        
-        .add-to-cart-btn:hover {
-            background-color: #3498db;
-            transform: translateY(-2px);
-        }
-        
-        .add-to-cart-btn:disabled {
-            background-color: #bdc3c7;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 25px;
-            border-radius: 8px;
-            color: white;
-            font-weight: bold;
-            z-index: 1000;
-            animation: slideIn 0.3s ease-out;
-        }
-        
-        .notification.success {
-            background-color: #27ae60;
-        }
-        
-        .notification.error {
-            background-color: #e74c3c;
-        }
-        
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-            font-size: 1.2em;
-        }
-        
-        .error-message {
-            text-align: center;
-            padding: 40px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin: 20px auto;
-            max-width: 600px;
-        }
-        
-        .error-message h2 {
-            color: #e74c3c;
-            margin-bottom: 10px;
-        }
-        
-        .cart-link {
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            color: inherit;
-        }
-        
-        .cart-link img {
-            margin-left: 10px;
-        }
-        
-        /* Screenshot Protection Styles */
-        .screenshot-blocker {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.95);
-            z-index: 9999;
-            backdrop-filter: blur(10px);
-            animation: fadeIn 0.3s ease;
-        }
-
-        .screenshot-blocker.visible {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .screenshot-warning {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 40px;
-            color: white;
-            max-width: 500px;
-            margin: 20px;
-            text-align: center;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(8px);
-            animation: slideUp 0.4s ease;
-        }
-
-        .screenshot-warning i {
-            font-size: 4em;
-            color: #e74c3c;
-            margin-bottom: 20px;
-            text-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
-            animation: pulse 2s infinite;
-        }
-
-        .screenshot-warning h2 {
-            font-size: 2em;
-            margin: 20px 0;
-            color: #fff;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        .screenshot-warning p {
-            font-size: 1.1em;
-            line-height: 1.6;
-            margin: 15px 0;
-            color: rgba(255, 255, 255, 0.9);
-        }
-
-        .warning-buttons {
-            margin-top: 30px;
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-        }
-
-        .close-warning {
-            background: linear-gradient(145deg, #e74c3c, #c0392b);
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            border-radius: 50px;
-            font-size: 1.1em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .close-warning:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
-            background: linear-gradient(145deg, #c0392b, #e74c3c);
-        }
-
-        .close-warning:active {
-            transform: translateY(1px);
-            box-shadow: 0 2px 10px rgba(231, 76, 60, 0.3);
-        }
-
-        .close-warning i {
-            font-size: 1.1em;
-            margin-right: 8px;
-            color: rgba(255, 255, 255, 0.9);
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
-                opacity: 1;
-            }
-            50% {
-                transform: scale(1.1);
-                opacity: 0.8;
-            }
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .screenshot-warning {
-                padding: 30px 20px;
-                margin: 15px;
-            }
-
-            .screenshot-warning h2 {
-                font-size: 1.8em;
-            }
-
-            .screenshot-warning p {
-                font-size: 1em;
-            }
-
-            .close-warning {
-                padding: 12px 30px;
-                font-size: 1em;
-            }
-        }
-    </style>
 </head>
 <body>
     <div class="header">
@@ -358,17 +38,42 @@
         </div>
     </div>
 
-    <!-- Screenshot Blocker -->
-    <div id="screenshotBlocker" class="screenshot-blocker">
-        <div class="screenshot-warning">
-            <i class="fas fa-exclamation-triangle"></i>
-            <h2>Screenshot Detected!</h2>
-            <p>Taking screenshots of artworks is not allowed to protect the artists' intellectual property rights.</p>
-            <p>Please respect our artists and purchase the artwork if you'd like to own it.</p>
-            <div class="warning-buttons">
-                <button onclick="closeScreenshotWarning()" class="close-warning">
+    <!-- Screenshot Blocker Modal -->
+    <div class="screenshot-blocker" id="screenshotBlocker">
+        <div class="warning-content">
+            <div class="warning-icon">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h2><i class="fas fa-exclamation-triangle"></i> Screenshot Detected!</h2>
+            <div class="warning-message">
+                <p class="primary-message">This artwork is protected by copyright.</p>
+                <p class="secondary-message">Taking screenshots or screen recordings is not allowed to protect our artists' intellectual property rights.</p>
+                <div class="protection-features">
+                    <div class="feature">
+                        <i class="fas fa-camera-slash"></i>
+                        <span>Screenshot Protection</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-fingerprint"></i>
+                        <span>Watermark Technology</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-user-shield"></i>
+                        <span>Artist Protection</span>
+                    </div>
+                </div>
+                <div class="legal-notice">
+                    <i class="fas fa-gavel"></i>
+                    <p>Unauthorized reproduction of these artworks may result in legal action.</p>
+                </div>
+            </div>
+            <div class="action-buttons">
+                <button onclick="closeScreenshotWarning()" class="close-btn primary-btn">
                     <i class="fas fa-check"></i> I Understand
                 </button>
+                <a href="about.html#copyright" class="secondary-btn">
+                    <i class="fas fa-info-circle"></i> Learn More
+                </a>
             </div>
         </div>
     </div>
@@ -503,63 +208,211 @@
         loadGallery();
 
         // Screenshot Protection
-        function showScreenshotWarning() {
+        let isProtectionActive = false;
+        let screenshotDetectionEnabled = true;
+
+        // Pre-create and add the overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'screenshot-protection-overlay';
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            z-index: 99998;
+            display: none;
+            pointer-events: none;
+            transition: opacity 0.2s ease-out;
+        `;
+
+        // Create a gradient overlay
+        const gradientOverlay = document.createElement('div');
+        gradientOverlay.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            pointer-events: none;
+            z-index: -1;
+        `;
+        overlay.appendChild(gradientOverlay);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.body.appendChild(overlay);
+            
+            // Ensure the screenshot blocker is the last element in body
             const blocker = document.getElementById('screenshotBlocker');
-            blocker.classList.add('visible');
-            document.body.style.overflow = 'hidden';
+            if (blocker && blocker.parentNode) {
+                blocker.parentNode.removeChild(blocker);
+                document.body.appendChild(blocker);
+            }
+        });
+
+        function showScreenshotWarning() {
+            if (!screenshotDetectionEnabled || isProtectionActive) return;
+            
+            isProtectionActive = true;
+
+            // First, immediately show overlay and blur
+            overlay.style.display = 'block';
+            document.querySelectorAll('.artwork-image').forEach(img => {
+                img.style.filter = 'blur(20px)';
+            });
+
+            // Then show the warning modal
+            const blocker = document.getElementById('screenshotBlocker');
+            if (blocker) {
+                blocker.style.zIndex = '1000000';
+                blocker.classList.add('visible');
+                document.body.style.overflow = 'hidden';
+            }
         }
 
         function closeScreenshotWarning() {
+            isProtectionActive = false;
+            screenshotDetectionEnabled = false;
+            
+            // Hide overlay
+            overlay.style.display = 'none';
+            
             const blocker = document.getElementById('screenshotBlocker');
-            blocker.classList.remove('visible');
-            document.body.style.overflow = '';
+            if (blocker) {
+                blocker.classList.remove('visible');
+                document.body.style.overflow = '';
+                
+                // Clear blur
+                document.querySelectorAll('.artwork-image').forEach(img => {
+                    img.style.filter = 'none';
+                });
+                
+                // Re-enable detection after a delay
+                setTimeout(() => {
+                    screenshotDetectionEnabled = true;
+                }, 500);
+            }
         }
 
-        // Detect screenshot attempts
-        document.addEventListener('keyup', function(e) {
-            // Windows: PrintScreen
-            if (e.key === 'PrintScreen') {
-                showScreenshotWarning();
+        // Screenshot detection
+        function initializeScreenshotProtection() {
+            // Preemptive protection for keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                // Detect Ctrl or Command key press
+                if (e.ctrlKey || e.metaKey) {
+                    showScreenshotWarning();
+                }
+                
+                // Detect Shift key press with Ctrl or Command
+                if (e.shiftKey && (e.ctrlKey || e.metaKey)) {
+                    showScreenshotWarning();
+                }
+                
+                // Handle PrintScreen key
+                if (e.key === 'PrintScreen' || e.code === 'PrintScreen') {
+                    e.preventDefault();
+                    showScreenshotWarning();
+                }
+            }, true);
+
+            // Handle key combinations
+            document.addEventListener('keyup', function(e) {
+                // Handle PrintScreen key
+                if (e.key === 'PrintScreen' || e.code === 'PrintScreen') {
+                    e.preventDefault();
+                    showScreenshotWarning();
+                }
+                
+                // If protection was triggered by Ctrl/Command, remove it if no screenshot happened
+                if (!e.ctrlKey && !e.metaKey && !e.shiftKey && !isProtectionActive) {
+                    closeScreenshotWarning();
+                }
+            }, true);
+
+            // Context menu prevention
+            document.addEventListener('contextmenu', (e) => {
+                if (e.target.closest('.artwork-image')) {
+                    e.preventDefault();
+                    showScreenshotWarning();
+                }
+            }, true);
+
+            // Selection prevention
+            document.addEventListener('selectstart', (e) => {
+                if (e.target.closest('.artwork-image')) {
+                    e.preventDefault();
+                    showScreenshotWarning();
+                }
+            }, true);
+
+            // Copy prevention
+            document.addEventListener('copy', (e) => {
+                if (e.target.closest('.artwork-image')) {
+                    e.preventDefault();
+                    showScreenshotWarning();
+                }
+            }, true);
+
+            // Screen capture prevention
+            if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
+                navigator.mediaDevices.getDisplayMedia = function() {
+                    showScreenshotWarning();
+                    return Promise.reject(new Error('Screen capture is not allowed'));
+                };
             }
+
+            // Window blur might indicate screenshot tool
+            window.addEventListener('blur', () => {
+                showScreenshotWarning();
+            }, true);
+
+            // Visibility change might indicate screenshot
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'hidden') {
+                    showScreenshotWarning();
+                }
+            }, true);
+
+            // Preemptive protection for Windows Snipping Tool
+            window.addEventListener('keydown', function(e) {
+                // Windows key detection
+                if (e.key === 'Windows' || e.key === 'Meta') {
+                    showScreenshotWarning();
+                }
+            }, true);
+
+            // Mouse event detection (might indicate screenshot tool)
+            document.addEventListener('mousedown', () => {
+                if (isProtectionActive) {
+                    showScreenshotWarning();
+                }
+            }, true);
+        }
+
+        // Initialize when gallery loads
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize screenshot protection
+            initializeScreenshotProtection();
             
-            // Windows: Ctrl + Shift + S or Windows + Shift + S
-            if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'S') {
-                showScreenshotWarning();
-            }
-            
-            // macOS: Cmd + Shift + 3 or Cmd + Shift + 4
-            if (e.metaKey && e.shiftKey && (e.key === '3' || e.key === '4')) {
-                showScreenshotWarning();
-            }
+            // Set initial state of images
+            document.querySelectorAll('.artwork-image').forEach(img => {
+                img.style.filter = 'none';
+                img.style.userSelect = 'none';
+                img.style.webkitUserSelect = 'none';
+                img.style.pointerEvents = 'none';
+                img.draggable = false;
+            });
         });
 
-        // Detect right-click and context menu
-        document.addEventListener('contextmenu', function(e) {
-            if (e.target.classList.contains('artwork-image')) {
-                e.preventDefault();
-                showScreenshotWarning();
-            }
-        });
-
-        // Detect copy attempts
-        document.addEventListener('copy', function(e) {
-            if (e.target.classList.contains('artwork-image')) {
-                e.preventDefault();
-                showScreenshotWarning();
-            }
-        });
-
-        // Additional protection for artwork images
-        document.querySelectorAll('.artwork-image').forEach(img => {
-            img.addEventListener('dragstart', e => e.preventDefault());
-            img.style.webkitTouchCallout = 'none';
-        });
-
-        // Listen for DevTools screenshot command
-        window.addEventListener('keydown', function(e) {
-            if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'P') {
-                showScreenshotWarning();
-            }
+        // Make sure images are clear on load
+        window.addEventListener('load', () => {
+            document.querySelectorAll('.artwork-image').forEach(img => {
+                img.style.filter = 'none';
+            });
         });
     </script>
 </body>

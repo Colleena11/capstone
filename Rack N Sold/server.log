@@ -13882,3 +13882,69 @@ rks in database: 12
 2025-02-11 00:48:35,385 - werkzeug - INFO - 127.0.0.1 - - [11/Feb/2025 00:48:35] "GET /api/cart HTTP/1.1" 200 -
 2025-02-11 00:48:38,059 - werkzeug - INFO - 127.0.0.1 - - [11/Feb/2025 00:48:38] "GET /api/cart HTTP/1.1" 200 -
 2025-02-11 00:49:30,815 - werkzeug - INFO - 127.0.0.1 - - [11/Feb/2025 00:49:30] "GET /api/cart HTTP/1.1" 200 -
+2025-02-11 07:51:54,623 - __main__ - INFO - Root directory: C:\Users\MALLARI\Downloads\Rack N Sold - Copy\Rack N Sold
+2025-02-11 07:51:54,625 - __main__ - INFO - Parent directory: C:\Users\MALLARI\Downloads\Rack N Sold - Copy
+2025-02-11 07:51:54,625 - __main__ - INFO - Admin directory: C:\Users\MALLARI\Downloads\Rack N Sold - Copy\admin-platform\public
+2025-02-11 07:51:54,626 - __main__ - INFO - Rack N Sold directory: C:\Users\MALLARI\Downloads\Rack N Sold - Copy\Rack N Sold
+2025-02-11 07:51:54,626 - __main__ - INFO - Database path: C:\Users\MALLARI\Downloads\Rack N Sold - Copy\Rack N Sold\artworks.db
+2025-02-11 07:51:54,730 - __main__ - INFO - Database tables created successfully
+2025-02-11 07:51:54,735 - __main__ - INFO - Current number of artworks in database: 13
+2025-02-11 07:51:54,735 - __main__ - INFO - Starting Flask server
+2025-02-11 07:51:54,928 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-02-11 07:51:54,929 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-02-11 07:51:54,931 - werkzeug - INFO -  * Restarting with stat
+2025-02-11 07:51:55,561 - __main__ - INFO - Root directory: C:\Users\MALLARI\Downloads\Rack N Sold - Copy\Rack N Sold
+2025-02-11 07:51:55,561 - __main__ - INFO - Parent directory: C:\Users\MALLARI\Downloads\Rack N Sold - Copy
+2025-02-11 07:51:55,562 - __main__ - INFO - Admin directory: C:\Users\MALLARI\Downloads\Rack N Sold - Copy\admin-platform\public
+2025-02-11 07:51:55,563 - __main__ - INFO - Rack N Sold directory: C:\Users\MALLARI\Downloads\Rack N Sold - Copy\Rack N Sold
+2025-02-11 07:51:55,563 - __main__ - INFO - Database path: C:\Users\MALLARI\Downloads\Rack N Sold - Copy\Rack N Sold\artworks.db
+2025-02-11 07:51:55,581 - __main__ - INFO - Database tables created successfully
+2025-02-11 07:51:55,586 - __main__ - INFO - Current number of artworks in database: 13
+2025-02-11 07:51:55,587 - __main__ - INFO - Starting Flask server
+2025-02-11 07:51:55,617 - werkzeug - WARNING -  * Debugger is active!
+2025-02-11 07:51:55,619 - werkzeug - INFO -  * Debugger PIN: 122-700-480
+2025-02-11 07:55:45,967 - __main__ - INFO - Root directory: C:\Users\MALLARI\Downloads\Rack N Sold - Copy\Rack N Sold
+2025-02-11 07:55:45,968 - __main__ - INFO - Parent directory: C:\Users\MALLARI\Downloads\Rack N Sold - Copy
+2025-02-11 07:55:45,969 - __main__ - INFO - Admin directory: C:\Users\MALLARI\Downloads\Rack N Sold - Copy\admin-platform\public
+2025-02-11 07:55:45,969 - __main__ - INFO - Rack N Sold directory: C:\Users\MALLARI\Downloads\Rack N Sold - Copy\Rack N Sold
+2025-02-11 07:55:45,970 - __main__ - INFO - Database path: C:\Users\MALLARI\Downloads\Rack N Sold - Copy\Rack N Sold\artworks.db
+2025-02-11 07:55:46,001 - __main__ - INFO - Database tables created successfully
+2025-02-11 07:55:46,007 - __main__ - INFO - Current number of artworks in database: 13
+2025-02-11 07:55:46,008 - __main__ - INFO - Starting Flask server
+2025-02-11 07:55:46,058 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-02-11 07:55:46,058 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-02-11 07:55:46,060 - werkzeug - INFO -  * Restarting with stat
+2025-02-11 07:55:46,758 - __main__ - INFO - Root directory: C:\Users\MALLARI\Downloads\Rack N Sold - Copy\Rack N Sold
+2025-02-11 07:55:46,758 - __main__ - INFO - Parent directory: C:\Users\MALLARI\Downloads\Rack N Sold - Copy
+2025-02-11 07:55:46,759 - __main__ - INFO - Admin directory: C:\Users\MALLARI\Downloads\Rack N Sold - Copy\admin-platform\public
+2025-02-11 07:55:46,759 - __main__ - INFO - Rack N Sold directory: C:\Users\MALLARI\Downloads\Rack N Sold - Copy\Rack N Sold
+2025-02-11 07:55:46,760 - __main__ - INFO - Database path: C:\Users\MALLARI\Downloads\Rack N Sold - Copy\Rack N Sold\artworks.db
+2025-02-11 07:55:46,785 - __main__ - INFO - Database tables created successfully
+2025-02-11 07:55:46,791 - __main__ - INFO - Current number of artworks in database: 13
+2025-02-11 07:55:46,792 - __main__ - INFO - Starting Flask server
+2025-02-11 07:55:46,829 - werkzeug - WARNING -  * Debugger is active!
+2025-02-11 07:55:46,832 - werkzeug - INFO -  * Debugger PIN: 122-700-480
+2025-02-11 08:00:08,174 - __main__ - INFO - Root directory: C:\Users\MALLARI\Downloads\Rack N Sold - Copy\Rack N Sold
+2025-02-11 08:00:08,174 - __main__ - INFO - Parent directory: C:\Users\MALLARI\Downloads\Rack N Sold - Copy
+2025-02-11 08:00:08,175 - __main__ - INFO - Admin directory: C:\Users\MALLARI\Downloads\Rack N Sold - Copy\admin-platform\public
+2025-02-11 08:00:08,175 - __main__ - INFO - Rack N Sold directory: C:\Users\MALLARI\Downloads\Rack N Sold - Copy\Rack N Sold
+2025-02-11 08:00:08,175 - __main__ - INFO - Database path: C:\Users\MALLARI\Downloads\Rack N Sold - Copy\Rack N Sold\artworks.db
+2025-02-11 08:00:08,206 - __main__ - INFO - Database tables created successfully
+2025-02-11 08:00:08,212 - __main__ - INFO - Current number of artworks in database: 13
+2025-02-11 08:00:08,213 - __main__ - INFO - Starting Flask server
+2025-02-11 08:00:08,273 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-02-11 08:00:08,273 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-02-11 08:00:08,275 - werkzeug - INFO -  * Restarting with stat
+2025-02-11 08:00:09,019 - __main__ - INFO - Root directory: C:\Users\MALLARI\Downloads\Rack N Sold - Copy\Rack N Sold
+2025-02-11 08:00:09,021 - __main__ - INFO - Parent directory: C:\Users\MALLARI\Downloads\Rack N Sold - Copy
+2025-02-11 08:00:09,021 - __main__ - INFO - Admin directory: C:\Users\MALLARI\Downloads\Rack N Sold - Copy\admin-platform\public
+2025-02-11 08:00:09,022 - __main__ - INFO - Rack N Sold directory: C:\Users\MALLARI\Downloads\Rack N Sold - Copy\Rack N Sold
+2025-02-11 08:00:09,022 - __main__ - INFO - Database path: C:\Users\MALLARI\Downloads\Rack N Sold - Copy\Rack N Sold\artworks.db
+2025-02-11 08:00:09,047 - __main__ - INFO - Database tables created successfully
+2025-02-11 08:00:09,056 - __main__ - INFO - Current number of artworks in database: 13
+2025-02-11 08:00:09,058 - __main__ - INFO - Starting Flask server
+2025-02-11 08:00:09,099 - werkzeug - WARNING -  * Debugger is active!
+2025-02-11 08:00:09,107 - werkzeug - INFO -  * Debugger PIN: 122-700-480
