@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gallery - Rack N Sold</title>
     <link rel="stylesheet" href="css/productstyles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <!-- Import Firebase and gallery scripts -->
     <script type="module" src="javascripts/firebase.js"></script>
@@ -20,11 +21,41 @@
             max-width: 200px;
             height: auto;
         }
-        .artworks-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
+        .artworks-row {
+            display: flex;
+            overflow-x: auto;
             padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .artworks-row h3 {
+            flex-basis: 100%;
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .artworks-section {
+            margin-bottom: 40px;
+        }
+        .approved-artworks {
+            background: #e0f7e0;
+        }
+        .pending-artworks {
+            background: #fff8e1;
+        }
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .section-title.approved {
+            color: #27ae60;
+        }
+        .section-title.pending {
+            color: #f1c40f;
         }
     </style>
 </head>
@@ -51,7 +82,346 @@
     </div>
     <div class="artwork-gallery">
         <h2>Available Artworks</h2>
-        <div id="artworks-container" class="artworks-grid"></div>
+        <div class="artworks-section">
+            <h3 class="section-title approved">Approved Artworks</h3>
+            <div id="approved-artworks" class="artworks-row approved-artworks"></div>
+        </div>
+        <div class="artworks-section">
+            <h3 class="section-title pending">Pending Artworks</h3>
+            <div id="pending-artworks" class="artworks-row pending-artworks"></div>
+        </div>
     </div>
+
+    <!-- Add Screenshot Blocker Modal -->
+    <div class="screenshot-blocker" id="screenshotBlocker">
+        <div class="warning-content">
+            <div class="warning-icon">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h2><i class="fas fa-exclamation-triangle"></i> Screenshot Detected!</h2>
+            <div class="warning-message">
+                <p class="primary-message">This artwork is protected by copyright.</p>
+                <p class="secondary-message">Taking screenshots or screen recordings is not allowed to protect our artists' intellectual property rights.</p>
+                <div class="protection-features">
+                    <div class="feature">
+                        <i class="fas fa-camera-slash"></i>
+                        <span>Screenshot Protection</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-fingerprint"></i>
+                        <span>Watermark Technology</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-user-shield"></i>
+                        <span>Artist Protection</span>
+                    </div>
+                </div>
+                <div class="legal-notice">
+                    <i class="fas fa-gavel"></i>
+                    <p>Unauthorized reproduction of these artworks may result in legal action.</p>
+                </div>
+            </div>
+            <div class="action-buttons">
+                <button onclick="closeScreenshotWarning()" class="close-btn primary-btn">
+                    <i class="fas fa-check"></i> I Understand
+                </button>
+                <a href="about.html#copyright" class="secondary-btn">
+                    <i class="fas fa-info-circle"></i> Learn More
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function createArtworkCard(artwork) {
+            const card = document.createElement('div');
+            card.className = 'artwork-card';
+            card.innerHTML = `
+                <img src="${artwork.image}" alt="${artwork.title}">
+                <h3>${artwork.title}</h3>
+                <p>By ${artwork.artist}</p>
+                <p>₱${artwork.price.toLocaleString()}</p>
+                <p>${artwork.description}</p>
+            `;
+            return card;
+        }
+
+        function loadGallery() {
+            const approvedContainer = document.getElementById('approved-artworks');
+            const pendingContainer = document.getElementById('pending-artworks');
+            approvedContainer.innerHTML = '';
+            pendingContainer.innerHTML = '';
+
+            try {
+                const artworks = JSON.parse(localStorage.getItem('artworks') || '[]');
+                artworks.forEach(artwork => {
+                    const card = createArtworkCard(artwork);
+                    if (artwork.status === 'approved') {
+                        approvedContainer.appendChild(card);
+                    } else if (artwork.status === 'pending') {
+                        pendingContainer.appendChild(card);
+                    }
+                });
+            } catch (error) {
+                console.error('Error loading gallery:', error);
+            }
+        }
+
+        // Add Screenshot Protection
+        let isProtectionActive = false;
+        let screenshotDetectionEnabled = true;
+
+        // Pre-create and add the overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'screenshot-protection-overlay';
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            z-index: 99998;
+            display: none;
+            pointer-events: none;
+            transition: opacity 0.2s ease-out;
+        `;
+
+        const gradientOverlay = document.createElement('div');
+        gradientOverlay.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            pointer-events: none;
+            z-index: -1;
+        `;
+        overlay.appendChild(gradientOverlay);
+
+        function showScreenshotWarning() {
+            if (!screenshotDetectionEnabled || isProtectionActive) return;
+            
+            isProtectionActive = true;
+            overlay.style.display = 'block';
+            document.querySelectorAll('img').forEach(img => {
+                img.style.filter = 'blur(20px)';
+            });
+
+            const blocker = document.getElementById('screenshotBlocker');
+            if (blocker) {
+                blocker.style.zIndex = '1000000';
+                blocker.classList.add('visible');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeScreenshotWarning() {
+            isProtectionActive = false;
+            screenshotDetectionEnabled = false;
+            
+            overlay.style.display = 'none';
+            
+            const blocker = document.getElementById('screenshotBlocker');
+            if (blocker) {
+                blocker.classList.remove('visible');
+                document.body.style.overflow = '';
+                
+                document.querySelectorAll('img').forEach(img => {
+                    img.style.filter = 'none';
+                });
+                
+                setTimeout(() => {
+                    screenshotDetectionEnabled = true;
+                }, 500);
+            }
+        }
+
+        function initializeScreenshotProtection() {
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey || e.metaKey || e.key === 'PrintScreen') {
+                    showScreenshotWarning();
+                }
+            }, true);
+
+            document.addEventListener('contextmenu', (e) => {
+                if (e.target.tagName === 'IMG') {
+                    e.preventDefault();
+                    showScreenshotWarning();
+                }
+            }, true);
+
+            window.addEventListener('blur', showScreenshotWarning, true);
+            
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'hidden') {
+                    showScreenshotWarning();
+                }
+            }, true);
+        }
+
+        // Initialize protection on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            document.body.appendChild(overlay);
+            
+            const blocker = document.getElementById('screenshotBlocker');
+            if (blocker && blocker.parentNode) {
+                blocker.parentNode.removeChild(blocker);
+                document.body.appendChild(blocker);
+            }
+
+            initializeScreenshotProtection();
+            loadGallery();
+
+            // Protect all images
+            document.querySelectorAll('img').forEach(img => {
+                img.style.userSelect = 'none';
+                img.style.webkitUserSelect = 'none';
+                img.style.pointerEvents = 'none';
+                img.draggable = false;
+            });
+        });
+
+        // Add screenshot blocker styles
+        const screenshotStyles = document.createElement('style');
+        screenshotStyles.textContent = `
+            .screenshot-blocker {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.9);
+                display: none;
+                justify-content: center;
+                align-items: center;
+                z-index: -1;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+            
+            .screenshot-blocker.visible {
+                display: flex;
+                opacity: 1;
+                z-index: 100000;
+            }
+
+            .warning-content {
+                background: white;
+                padding: 30px;
+                border-radius: 10px;
+                max-width: 500px;
+                text-align: center;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            }
+
+            .warning-icon {
+                font-size: 3em;
+                color: #e74c3c;
+                margin-bottom: 20px;
+            }
+
+            .warning-message {
+                margin: 20px 0;
+            }
+
+            .primary-message {
+                font-size: 1.2em;
+                font-weight: bold;
+                color: #e74c3c;
+                margin-bottom: 10px;
+            }
+
+            .secondary-message {
+                color: #666;
+                margin-bottom: 20px;
+            }
+
+            .protection-features {
+                display: flex;
+                justify-content: space-around;
+                margin: 20px 0;
+            }
+
+            .feature {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .feature i {
+                font-size: 1.5em;
+                color: #3498db;
+            }
+
+            .feature span {
+                font-size: 0.9em;
+                color: #666;
+            }
+
+            .legal-notice {
+                background: #f8f9fa;
+                padding: 15px;
+                border-radius: 8px;
+                margin: 20px 0;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .legal-notice i {
+                color: #e74c3c;
+                font-size: 1.2em;
+            }
+
+            .legal-notice p {
+                color: #666;
+                font-size: 0.9em;
+                margin: 0;
+            }
+
+            .action-buttons {
+                margin-top: 20px;
+                display: flex;
+                gap: 10px;
+                justify-content: center;
+            }
+
+            .primary-btn, .secondary-btn {
+                padding: 10px 20px;
+                border-radius: 5px;
+                border: none;
+                cursor: pointer;
+                font-weight: bold;
+                text-decoration: none;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .primary-btn {
+                background: #3498db;
+                color: white;
+            }
+
+            .secondary-btn {
+                background: #95a5a6;
+                color: white;
+            }
+
+            .primary-btn:hover {
+                background: #2980b9;
+            }
+
+            .secondary-btn:hover {
+                background: #7f8c8d;
+            }
+        `;
+        document.head.appendChild(screenshotStyles);
+    </script>
 </body>
 </html>

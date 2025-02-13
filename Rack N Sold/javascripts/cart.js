@@ -89,17 +89,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         function updateTotals(items) {
-            const subtotal = Array.isArray(items) 
-                ? items.reduce((sum, item) => sum + Number(item.price), 0)
-                : 0;
-            const shipping = subtotal > 0 ? 500 : 0; // 500 peso shipping fee
-            const total = subtotal + shipping;
+            try {
+                // Ensure items is an array
+                const cartItems = Array.isArray(items) ? items : [];
+                
+                // Calculate totals
+                const subtotal = cartItems.reduce((sum, item) => {
+                    const price = Number(item.price) || 0;
+                    return sum + price;
+                }, 0);
+                
+                const shipping = subtotal > 0 ? 500 : 0; // 500 peso shipping fee
+                const total = subtotal + shipping;
 
-            document.getElementById('subtotal').textContent = `₱${subtotal.toFixed(2)}`;
-            document.getElementById('shipping').textContent = `₱${shipping.toFixed(2)}`;
-            document.getElementById('total').textContent = `₱${total.toFixed(2)}`;
-
-            checkoutBtn.disabled = subtotal === 0;
+                // Update DOM elements
+                document.getElementById('subtotal').textContent = `₱${subtotal.toFixed(2)}`;
+                document.getElementById('shipping').textContent = `₱${shipping.toFixed(2)}`;
+                document.getElementById('total').textContent = `₱${total.toFixed(2)}`;
+            } catch (error) {
+                console.error('Error updating cart totals:', error);
+                // Set default values if there's an error
+                document.getElementById('subtotal').textContent = '₱0.00';
+                document.getElementById('shipping').textContent = '₱0.00';
+                document.getElementById('total').textContent = '₱0.00';
+            }
         }
 
         // Make removeFromCart available globally

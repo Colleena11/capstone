@@ -172,6 +172,12 @@
             padding: 40px;
             color: #666;
         }
+        .gallery-section {
+            margin-bottom: 40px;
+        }
+        .gallery-section h2 {
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
@@ -182,8 +188,15 @@
         </button>
     </div>
     
-    <div id="gallery" class="gallery">
-        <div class="loading">Loading artworks...</div>
+    <div id="gallery">
+        <div class="gallery-section">
+            <h2>Pending Artworks</h2>
+            <div id="pending-artworks" class="gallery"></div>
+        </div>
+        <div class="gallery-section">
+            <h2>Approved Artworks</h2>
+            <div id="approved-artworks" class="gallery"></div>
+        </div>
     </div>
 
     <div id="notification"></div>
@@ -218,6 +231,7 @@
                     if (card) {
                         card.className = `artwork-card ${status}`;
                         showNotification(`Artwork ${status === 'approved' ? 'approved' : 'rejected'} successfully`, 'success');
+                        loadGallery();
                     }
                 }
             } catch (error) {
@@ -272,14 +286,17 @@
         }
 
         function loadGallery() {
-            const gallery = document.querySelector('.gallery');
-            gallery.innerHTML = ''; // Clear existing content
+            const pendingContainer = document.getElementById('pending-artworks');
+            const approvedContainer = document.getElementById('approved-artworks');
+            pendingContainer.innerHTML = ''; // Clear existing content
+            approvedContainer.innerHTML = ''; // Clear existing content
             
             try {
                 const artworks = JSON.parse(localStorage.getItem('artworks') || '[]');
                 
                 if (artworks.length === 0) {
-                    gallery.innerHTML = '<p class="no-artworks">No artworks uploaded yet.</p>';
+                    pendingContainer.innerHTML = '<p class="no-artworks">No artworks uploaded yet.</p>';
+                    approvedContainer.innerHTML = '<p class="no-artworks">No artworks uploaded yet.</p>';
                     return;
                 }
                 
@@ -291,7 +308,12 @@
                 });
                 
                 artworks.forEach(artwork => {
-                    gallery.appendChild(createArtworkCard(artwork));
+                    const card = createArtworkCard(artwork);
+                    if (artwork.status === 'pending') {
+                        pendingContainer.appendChild(card);
+                    } else if (artwork.status === 'approved') {
+                        approvedContainer.appendChild(card);
+                    }
                 });
                 
             } catch (error) {

@@ -458,6 +458,106 @@
             color: #7f8c8d;
             font-size: 0.9em;
         }
+
+        .cart-link {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .cart-counter {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
+            min-width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease;
+        }
+        
+        .cart-counter.update {
+            animation: bounce 0.3s ease;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .screenshot-blocker {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .screenshot-blocker.visible {
+            display: flex;
+            opacity: 1;
+            z-index: 100000;
+        }
+
+        .warning-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .warning-message {
+            margin: 20px 0;
+        }
+
+        .primary-message {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #e74c3c;
+            margin-bottom: 10px;
+        }
+
+        .protection-features {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+
+        .feature {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .feature i {
+            font-size: 1.5em;
+            color: #3498db;
+        }
+
+        .legal-notice {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
     </style>
 </head>
 <body>
@@ -477,8 +577,9 @@
                         <li><a href="contact.html">Contact</a></li>
                     </ul>
                 </nav>
-                <a href="cart.html" class="active">
+                <a href="cart.html" class="active cart-link">
                     <img src="../images/cart.png" width="30px" height="30px">
+                    <span class="cart-counter"></span>
                 </a>
             </div>
         </div>
@@ -488,10 +589,6 @@
         <div class="cart-header">
             <h2>
                 Shopping Cart
-                <span id="cart-count" class="cart-count">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span>0</span> items
-                </span>
             </h2>
         </div>
         <div id="cart-items" class="cart-items"></div>
@@ -520,6 +617,46 @@
                     <i class="fas fa-paper-plane"></i> Send Message
                 </button>
             </form>
+        </div>
+    </div>
+
+    <!-- Add Screenshot Blocker Modal -->
+    <div class="screenshot-blocker" id="screenshotBlocker">
+        <div class="warning-content">
+            <div class="warning-icon">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h2><i class="fas fa-exclamation-triangle"></i> Screenshot Detected!</h2>
+            <div class="warning-message">
+                <p class="primary-message">This artwork is protected by copyright.</p>
+                <p class="secondary-message">Taking screenshots or screen recordings is not allowed to protect our artists' intellectual property rights.</p>
+                <div class="protection-features">
+                    <div class="feature">
+                        <i class="fas fa-camera-slash"></i>
+                        <span>Screenshot Protection</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-fingerprint"></i>
+                        <span>Watermark Technology</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-user-shield"></i>
+                        <span>Artist Protection</span>
+                    </div>
+                </div>
+                <div class="legal-notice">
+                    <i class="fas fa-gavel"></i>
+                    <p>Unauthorized reproduction of these artworks may result in legal action.</p>
+                </div>
+            </div>
+            <div class="action-buttons">
+                <button onclick="closeScreenshotWarning()" class="close-btn primary-btn">
+                    <i class="fas fa-check"></i> I Understand
+                </button>
+                <a href="about.html#copyright" class="secondary-btn">
+                    <i class="fas fa-info-circle"></i> Learn More
+                </a>
+            </div>
         </div>
     </div>
 
@@ -677,21 +814,37 @@
             closeMessageModal();
         }
 
-        function loadCart() {
+        async function loadCart() {
             const cartContainer = document.getElementById('cart-items');
             const totalElement = document.getElementById('cart-total');
-            
+
             try {
-                const cartItems = JSON.parse(localStorage.getItem('cart') || '[]');
+                // Get cart items from localStorage
+                const cartData = localStorage.getItem('cart');
+                let cartItems = [];
                 
-                // Update cart count
+                if (cartData) {
+                    try {
+                        cartItems = JSON.parse(cartData);
+                        // Ensure cartItems is an array
+                        if (!Array.isArray(cartItems)) {
+                            cartItems = [];
+                        }
+                    } catch (parseError) {
+                        console.error('Error parsing cart data:', parseError);
+                        cartItems = [];
+                    }
+                }
+
+                // Update cart counter
                 updateCartCount(cartItems.length);
-                
-                if (cartItems.length === 0) {
+
+                // Show empty cart message if no items
+                if (!cartItems.length) {
                     cartContainer.innerHTML = `
                         <div class="empty-cart">
                             <h3>Your cart is empty</h3>
-                            <p>Browse our gallery to add some amazing artworks!</p>
+                            <p>Browse our gallery to add some artworks!</p>
                             <a href="gallery.html" class="browse-btn">
                                 <i class="fas fa-shopping-bag"></i> Continue Shopping
                             </a>
@@ -704,8 +857,11 @@
                 // Clear existing items
                 cartContainer.innerHTML = '';
                 
-                // Calculate total
-                const total = cartItems.reduce((sum, item) => sum + item.price, 0);
+                // Calculate total (ensure prices are numbers)
+                const total = cartItems.reduce((sum, item) => {
+                    const price = parseFloat(item.price) || 0;
+                    return sum + price;
+                }, 0);
                 
                 // Add items to cart
                 cartItems.forEach(item => {
@@ -732,35 +888,31 @@
                         <p>Please try again later</p>
                     </div>
                 `;
+                totalElement.style.display = 'none';
+                updateCartCount(0);
             }
-        }
-
-        function proceedToCheckout() {
-            // For now, just show a notification
-            showNotification('Checkout functionality coming soon!', 'success');
         }
 
         function updateCartCount(count) {
-            const cartCount = document.getElementById('cart-count');
-            const countSpan = cartCount.querySelector('span');
-            const oldCount = parseInt(countSpan.textContent);
-            
-            // Update count
-            countSpan.textContent = count;
-            cartCount.classList.toggle('empty', count === 0);
-            
-            // Add animation if count changed
-            if (oldCount !== count) {
-                cartCount.classList.add('update');
-                setTimeout(() => cartCount.classList.remove('update'), 300);
+            const cartLink = document.querySelector('.cart-link');
+            if (cartLink) {
+                // Create or update the counter element
+                let counter = cartLink.querySelector('.cart-counter');
+                if (!counter) {
+                    counter = document.createElement('span');
+                    counter.className = 'cart-counter';
+                    cartLink.appendChild(counter);
+                }
+                
+                // Update counter value and visibility
+                counter.textContent = count;
+                counter.style.display = count > 0 ? 'block' : 'none';
+                
+                // Add animation class
+                counter.classList.remove('update');
+                void counter.offsetWidth; // Force reflow
+                counter.classList.add('update');
             }
-            
-            // Update text
-            const itemText = count === 1 ? 'item' : 'items';
-            cartCount.innerHTML = `
-                <i class="fas fa-shopping-cart"></i>
-                <span>${count}</span> ${itemText}
-            `;
         }
 
         // Listen for cart updates from gallery page
@@ -787,6 +939,176 @@
 
         // Initial load
         loadCart();
+
+        // Add these functions after your existing script
+        let isProtectionActive = false;
+        let screenshotDetectionEnabled = true;
+
+        // Pre-create and add the overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'screenshot-protection-overlay';
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            z-index: 99998;
+            display: none;
+            pointer-events: none;
+            transition: opacity 0.2s ease-out;
+        `;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.body.appendChild(overlay);
+            initializeScreenshotProtection();
+            
+            // Protect all artwork images
+            document.querySelectorAll('.cart-item img').forEach(img => {
+                img.style.userSelect = 'none';
+                img.style.webkitUserSelect = 'none';
+                img.style.pointerEvents = 'none';
+                img.draggable = false;
+            });
+        });
+
+        function showScreenshotWarning() {
+            if (!screenshotDetectionEnabled || isProtectionActive) return;
+            
+            isProtectionActive = true;
+            overlay.style.display = 'block';
+            document.querySelectorAll('.cart-item img').forEach(img => {
+                img.style.filter = 'blur(20px)';
+            });
+
+            const blocker = document.getElementById('screenshotBlocker');
+            if (blocker) {
+                blocker.style.zIndex = '1000000';
+                blocker.classList.add('visible');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeScreenshotWarning() {
+            isProtectionActive = false;
+            screenshotDetectionEnabled = false;
+            
+            overlay.style.display = 'none';
+            
+            const blocker = document.getElementById('screenshotBlocker');
+            if (blocker) {
+                blocker.classList.remove('visible');
+                document.body.style.overflow = '';
+                
+                document.querySelectorAll('.cart-item img').forEach(img => {
+                    img.style.filter = 'none';
+                });
+                
+                setTimeout(() => {
+                    screenshotDetectionEnabled = true;
+                }, 500);
+            }
+        }
+
+        function initializeScreenshotProtection() {
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey || e.metaKey || e.key === 'PrintScreen') {
+                    showScreenshotWarning();
+                }
+            }, true);
+
+            document.addEventListener('contextmenu', (e) => {
+                if (e.target.closest('.cart-item img')) {
+                    e.preventDefault();
+                    showScreenshotWarning();
+                }
+            }, true);
+
+            window.addEventListener('blur', showScreenshotWarning, true);
+            
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'hidden') {
+                    showScreenshotWarning();
+                }
+            }, true);
+        }
+
+        // Add screenshot blocker styles
+        const screenshotStyles = document.createElement('style');
+        screenshotStyles.textContent = `
+            .screenshot-blocker {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.9);
+                display: none;
+                justify-content: center;
+                align-items: center;
+                z-index: -1;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+            
+            .screenshot-blocker.visible {
+                display: flex;
+                opacity: 1;
+                z-index: 100000;
+            }
+
+            .warning-content {
+                background: white;
+                padding: 30px;
+                border-radius: 10px;
+                max-width: 500px;
+                text-align: center;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            }
+
+            .warning-message {
+                margin: 20px 0;
+            }
+
+            .primary-message {
+                font-size: 1.2em;
+                font-weight: bold;
+                color: #e74c3c;
+                margin-bottom: 10px;
+            }
+
+            .protection-features {
+                display: flex;
+                justify-content: space-around;
+                margin: 20px 0;
+            }
+
+            .feature {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .feature i {
+                font-size: 1.5em;
+                color: #3498db;
+            }
+
+            .legal-notice {
+                background: #f8f9fa;
+                padding: 15px;
+                border-radius: 8px;
+                margin: 20px 0;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+        `;
+        document.head.appendChild(screenshotStyles);
     </script>
 </body>
 </html>

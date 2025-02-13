@@ -6,6 +6,163 @@
     <title>Art Gallery - Rack N Sold</title>
     <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .gallery-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .gallery-container h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 40px;
+            font-size: 2.5em;
+            font-weight: 600;
+        }
+
+        .gallery-section {
+            margin-bottom: 60px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .gallery-section h2 {
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            font-size: 1.8em;
+            background: #fff;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .artworks-grid {
+            display: flex;
+            overflow-x: auto;
+            gap: 30px;
+            padding: 30px;
+        }
+        
+        .artwork-card {
+            flex: 0 0 auto;
+            width: 280px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .artwork-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .artwork-image {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+        }
+
+        .artwork-info {
+            padding: 20px;
+        }
+
+        .artwork-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #333;
+            margin: 0 0 10px 0;
+        }
+
+        .artwork-artist {
+            color: #666;
+            font-size: 0.9em;
+            margin: 0 0 10px 0;
+        }
+
+        .artwork-price {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #2ecc71;
+            margin: 15px 0;
+        }
+
+        .add-to-cart-btn {
+            width: 100%;
+            padding: 12px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .add-to-cart-btn:hover {
+            background: #2980b9;
+        }
+        
+        .pending-artworks {
+            background-color: #fff;
+        }
+        
+        .pending-artworks h2 {
+            background-color: #fff9e6;
+            color: #b7791f;
+        }
+        
+        .approved-artworks {
+            background-color: #fff;
+        }
+        
+        .approved-artworks h2 {
+            background-color: #f8f9fa;
+            color: #2c5282;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2em;
+            color: #666;
+        }
+
+        .error-message {
+            text-align: center;
+            padding: 40px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .error-message h3 {
+            color: #e74c3c;
+            margin-bottom: 10px;
+        }
+
+        .error-message p {
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .gallery-container {
+                padding: 20px 10px;
+            }
+
+            .artworks-grid {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+                gap: 20px;
+                padding: 20px;
+            }
+
+            .artwork-image {
+                height: 180px;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="header">
@@ -33,8 +190,13 @@
 
     <div class="gallery-container">
         <h2>Art Gallery</h2>
-        <div id="gallery" class="gallery">
-            <div class="loading">Loading artworks...</div>
+        <div class="gallery-section approved-artworks">
+            <h2>Approved Artworks</h2>
+            <div id="approved-artworks" class="artworks-grid"></div>
+        </div>
+        <div class="gallery-section pending-artworks">
+            <h2>Pending Artworks</h2>
+            <div id="pending-artworks" class="artworks-grid"></div>
         </div>
     </div>
 
@@ -121,7 +283,19 @@
                 }
                 
                 // Get current cart
-                let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+                let cart;
+                try {
+                    const cartData = localStorage.getItem('cart');
+                    cart = cartData ? JSON.parse(cartData) : [];
+                    
+                    // Ensure cart is an array
+                    if (!Array.isArray(cart)) {
+                        cart = [];
+                    }
+                } catch (parseError) {
+                    console.error('Error parsing cart data:', parseError);
+                    cart = [];
+                }
                 
                 // Check if already in cart
                 if (cart.some(item => item.id === artworkId)) {
@@ -133,20 +307,18 @@
                 cart.push({
                     id: artwork.id,
                     title: artwork.title,
-                    price: artwork.price,
+                    price: parseFloat(artwork.price) || 0,
                     image: artwork.image,
                     artist: artwork.artist
                 });
                 
                 // Save cart
                 localStorage.setItem('cart', JSON.stringify(cart));
-                showNotification('Added to cart successfully!', 'success');
                 
-                // Update cart count if exists
-                const cartCount = document.querySelector('.cart-count');
-                if (cartCount) {
-                    cartCount.textContent = cart.length;
-                }
+                // Update cart counter
+                updateCartCount(cart.length);
+                
+                showNotification('Added to cart successfully!', 'success');
                 
             } catch (error) {
                 console.error('Error adding to cart:', error);
@@ -154,48 +326,75 @@
             }
         }
 
-        function loadGallery() {
-            const gallery = document.querySelector('.gallery');
-            gallery.innerHTML = '<div class="loading">Loading artworks...</div>';
-            
-            try {
-                // Get artworks from localStorage
-                const artworks = JSON.parse(localStorage.getItem('artworks') || '[]');
-                
-                // Filter only approved artworks
-                const approvedArtworks = artworks.filter(art => art.status === 'approved');
-                
-                if (approvedArtworks.length === 0) {
-                    gallery.innerHTML = `
-                        <div class="error-message">
-                            <h2>No Artworks Available</h2>
-                            <p>Check back later for new artworks!</p>
-                        </div>
-                    `;
-                    return;
+        function updateCartCount(count) {
+            const cartLink = document.querySelector('.cart-link');
+            if (cartLink) {
+                // Create or update the counter element
+                let counter = cartLink.querySelector('.cart-counter');
+                if (!counter) {
+                    counter = document.createElement('span');
+                    counter.className = 'cart-counter';
+                    cartLink.appendChild(counter);
                 }
                 
-                // Clear loading message
-                gallery.innerHTML = '';
+                // Update counter value and visibility
+                counter.textContent = count;
+                counter.style.display = count > 0 ? 'block' : 'none';
                 
-                // Sort by newest first
-                approvedArtworks.sort((a, b) => new Date(b.uploadDate) - new Date(a.uploadDate));
-                
-                // Create and append artwork cards
-                approvedArtworks.forEach(artwork => {
-                    gallery.appendChild(createArtworkCard(artwork));
-                });
-                
-            } catch (error) {
-                console.error('Error loading gallery:', error);
-                gallery.innerHTML = `
-                    <div class="error-message">
-                        <h2>Error Loading Gallery</h2>
-                        <p>Please try again later.</p>
-                    </div>
-                `;
+                // Add animation class
+                counter.classList.remove('update');
+                void counter.offsetWidth; // Force reflow
+                counter.classList.add('update');
             }
         }
+
+        // Initialize cart counter when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                const cartData = localStorage.getItem('cart');
+                const cart = cartData ? JSON.parse(cartData) : [];
+                updateCartCount(Array.isArray(cart) ? cart.length : 0);
+            } catch (error) {
+                console.error('Error initializing cart counter:', error);
+                updateCartCount(0);
+            }
+        });
+
+        // Add cart counter styles
+        const cartCounterStyles = document.createElement('style');
+        cartCounterStyles.textContent = `
+            .cart-link {
+                position: relative;
+                display: inline-block;
+            }
+            
+            .cart-counter {
+                position: absolute;
+                top: -8px;
+                right: -8px;
+                background: #e74c3c;
+                color: white;
+                border-radius: 50%;
+                padding: 2px 6px;
+                font-size: 12px;
+                min-width: 18px;
+                height: 18px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: transform 0.2s ease;
+            }
+            
+            .cart-counter.update {
+                animation: bounce 0.3s ease;
+            }
+            
+            @keyframes bounce {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.2); }
+            }
+        `;
+        document.head.appendChild(cartCounterStyles);
 
         // Listen for artwork status updates from admin panel
         window.addEventListener('storage', function(e) {
@@ -414,6 +613,244 @@
                 img.style.filter = 'none';
             });
         });
+
+        async function loadGallery() {
+            const approvedContainer = document.getElementById('approved-artworks');
+            const pendingContainer = document.getElementById('pending-artworks');
+            approvedContainer.innerHTML = '';
+            pendingContainer.innerHTML = '';
+
+            try {
+                const artworks = JSON.parse(localStorage.getItem('artworks') || '[]');
+                const approvedArtworks = artworks.filter(artwork => artwork.status === 'approved');
+                const pendingArtworks = artworks.filter(artwork => artwork.status === 'pending');
+
+                if (!artworks || (approvedArtworks.length === 0 && pendingArtworks.length === 0)) {
+                    document.querySelector('.gallery-container').innerHTML = `
+                        <div class="error-message">
+                            <h3>No artworks available</h3>
+                            <p>Check back later for new additions!</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Display approved artworks
+                if (approvedArtworks.length > 0) {
+                    approvedArtworks.forEach(artwork => {
+                        const card = createArtworkCard(artwork);
+                        approvedContainer.appendChild(card);
+                    });
+                } else {
+                    approvedContainer.innerHTML = '<p class="no-artworks">No approved artworks available.</p>';
+                }
+
+                // Display pending artworks
+                if (pendingArtworks.length > 0) {
+                    pendingArtworks.forEach(artwork => {
+                        const card = createArtworkCard(artwork);
+                        pendingContainer.appendChild(card);
+                    });
+                } else {
+                    pendingContainer.innerHTML = '<p class="no-artworks">No pending artworks available.</p>';
+                }
+
+            } catch (error) {
+                console.error('Error loading gallery:', error);
+                document.querySelector('.gallery-container').innerHTML = `
+                    <div class="error-message">
+                        <h3>Error loading artworks</h3>
+                        <p>Please try again later</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Add styles for the gallery sections
+        const galleryStyles = document.createElement('style');
+        galleryStyles.textContent = `
+            .gallery-container {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 40px 20px;
+            }
+
+            .gallery-container h2 {
+                text-align: center;
+                color: #333;
+                margin-bottom: 40px;
+                font-size: 2.5em;
+                font-weight: 600;
+            }
+
+            .gallery-section {
+                margin-bottom: 60px;
+                border-radius: 12px;
+                overflow: hidden;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            }
+            
+            .gallery-section h2 {
+                color: #333;
+                margin: 0;
+                padding: 20px;
+                font-size: 1.8em;
+                background: #fff;
+                border-bottom: 1px solid #eee;
+            }
+            
+            .artworks-grid {
+                display: flex;
+                overflow-x: auto;
+                gap: 30px;
+                padding: 30px;
+            }
+            
+            .artwork-card {
+                flex: 0 0 auto;
+                width: 280px;
+                background: white;
+                border-radius: 10px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                overflow: hidden;
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+
+            .artwork-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            }
+
+            .artwork-image {
+                width: 100%;
+                height: 220px;
+                object-fit: cover;
+            }
+
+            .artwork-info {
+                padding: 20px;
+            }
+
+            .artwork-title {
+                font-size: 1.2em;
+                font-weight: 600;
+                color: #333;
+                margin: 0 0 10px 0;
+            }
+
+            .artwork-artist {
+                color: #666;
+                font-size: 0.9em;
+                margin: 0 0 10px 0;
+            }
+
+            .artwork-price {
+                font-size: 1.3em;
+                font-weight: 600;
+                color: #2ecc71;
+                margin: 15px 0;
+            }
+
+            .add-to-cart-btn {
+                width: 100%;
+                padding: 12px;
+                background: #3498db;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                font-size: 1em;
+                cursor: pointer;
+                transition: background 0.3s ease;
+            }
+
+            .add-to-cart-btn:hover {
+                background: #2980b9;
+            }
+            
+            .pending-artworks {
+                background-color: #fff;
+            }
+            
+            .pending-artworks h2 {
+                background-color: #fff9e6;
+                color: #b7791f;
+            }
+            
+            .approved-artworks {
+                background-color: #fff;
+            }
+            
+            .approved-artworks h2 {
+                background-color: #f8f9fa;
+                color: #2c5282;
+            }
+
+            .loading {
+                text-align: center;
+                padding: 40px;
+                font-size: 1.2em;
+                color: #666;
+            }
+
+            .error-message {
+                text-align: center;
+                padding: 40px;
+                background: #fff;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+
+            .error-message h3 {
+                color: #e74c3c;
+                margin-bottom: 10px;
+            }
+
+            .error-message p {
+                color: #666;
+            }
+
+            @media (max-width: 768px) {
+                .gallery-container {
+                    padding: 20px 10px;
+                }
+
+                .artworks-grid {
+                    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+                    gap: 20px;
+                    padding: 20px;
+                }
+
+                .artwork-image {
+                    height: 180px;
+                }
+            }
+        `;
+        document.head.appendChild(galleryStyles);
+
+// Update the DOMContentLoaded event listener
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize screenshot protection
+    initializeScreenshotProtection();
+    
+    // Load the gallery
+    loadGallery();
+    
+    // Set initial state of images
+    document.querySelectorAll('.artwork-image').forEach(img => {
+        img.style.filter = 'none';
+        img.style.userSelect = 'none';
+        img.style.webkitUserSelect = 'none';
+        img.style.pointerEvents = 'none';
+        img.draggable = false;
+    });
+});
+
+// Make sure images are clear on load
+window.addEventListener('load', () => {
+    document.querySelectorAll('.artwork-image').forEach(img => {
+        img.style.filter = 'none';
+    });
+});
     </script>
 </body>
 </html>
